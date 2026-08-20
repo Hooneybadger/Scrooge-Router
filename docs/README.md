@@ -5,6 +5,17 @@ SPDX-License-Identifier: Apache-2.0
 
 # 문서
 
+## 이 프로젝트
+
+- [architecture.md](architecture.md): 세 계층 구조와 데이터 흐름
+- [decisions.md](decisions.md): 설계 결정과 실패한 시도의 기록
+- [roadmap.md](roadmap.md): 확장 지점과 앞으로 할 일
+- [실험 파이프라인](../research/README.md): 아티팩트를 다시 만드는 절차
+
+## 대회 규격 (주최측 문서)
+
+아래 문서는 fork한 원본 저장소의 내용을 그대로 둔 것입니다.
+
 ## 참가자 필수
 
 - [CHALLENGE_RULES.md](CHALLENGE_RULES.md): 라우터 실행 입력·선택 결과와 참가 규칙

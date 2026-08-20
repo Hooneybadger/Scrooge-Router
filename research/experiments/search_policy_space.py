@@ -212,7 +212,7 @@ def main() -> int:
         ),
     }
 
-    print("\n=== H010 public baselines (fixed selection) ===", flush=True)
+    print("\n=== public baselines (fixed selection) ===", flush=True)
     baselines: list[dict[str, Any]] = []
     inputs_by_split = {"train": bundle.inputs, "dev": dev_inputs}
     for name in ("always_light", "prompt_heuristic", "feature_budget"):
@@ -261,7 +261,7 @@ def main() -> int:
             flush=True,
         )
 
-    print("\n=== H020 parent the feasibility ladder (sets the risk budget) ===", flush=True)
+    print("\n=== parent feasibility ladder (sets the risk budget) ===", flush=True)
     ladder = json.loads(LADDER_PATH.read_text(encoding="utf-8"))
     probe = Search(contexts, None)
     parent_row = probe.run("the feasibility ladder", ladder, stage="parent")
