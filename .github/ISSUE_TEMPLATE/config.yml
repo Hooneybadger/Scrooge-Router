@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright 2026 Scrooge Router contributors
+# SPDX-License-Identifier: Apache-2.0
+
+blank_issues_enabled: true
+contact_links:
+  - name: 대회 규칙과 채점 기준
+    url: https://github.com/sktelecom/ossp-2026-llm-router-challenge/tree/main/docs
+    about: 비용 한도와 채점식, 실행 환경은 주최측 문서를 따릅니다.

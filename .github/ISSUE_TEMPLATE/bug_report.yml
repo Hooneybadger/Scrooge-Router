@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright 2026 Scrooge Router contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: 🐛 Bug Report
+description: 문서와 다르게 동작하는 부분을 알려주세요
+labels: ['🐛 bug']
+title: '[Bug]: '
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: 어떤 문제가 있었는지 알려주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: To Reproduce
+      description: 실행한 명령과 입력을 알려주세요. 등급(fast/balanced/premium)도 함께 적어주시면 좋습니다.
+      render: console
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: 운영체제, Python 버전, 커밋 SHA를 알려주세요.
+      placeholder: Ubuntu 24.04 / Python 3.11 / 3cccbf6
+
+  - type: textarea
+    id: etc
+    attributes:
+      label: etc.
