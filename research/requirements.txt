@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: Copyright 2026 Scrooge Router contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# 실험 파이프라인에만 필요합니다. 제출 이미지에 들어가는 src/ 코드는
+# 표준 라이브러리만 사용합니다.
+numpy==2.0.2
