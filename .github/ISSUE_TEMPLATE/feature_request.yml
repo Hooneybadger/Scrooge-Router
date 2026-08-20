@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: Copyright 2026 Scrooge Router contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: ✨ Feature Request
+description: 새 기능이나 개선 방향을 제안해주세요
+labels: ['✨ feature']
+title: '[Feature]: '
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: 어떤 상황에서 무엇이 아쉬웠는지 알려주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: possible-solution
+    attributes:
+      label: Possible Solution
+      placeholder: 이렇게 하면 될 것 같습니다.
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: 런타임 제약
+      description: 제출 이미지에 들어가는 코드를 바꾸는 제안이라면 확인해주세요.
+      options:
+        - label: 실행 중 네트워크 접근이나 외부 다운로드가 필요하지 않습니다.
+        - label: 프롬프트 내용 외의 정보(문항 ID, 입력 순서, 정답)를 쓰지 않습니다.
+
+  - type: textarea
+    id: etc
+    attributes:
+      label: etc.

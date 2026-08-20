@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright 2026 Scrooge Router contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: 🙋 Question
+description: 사용법이나 동작 방식을 물어보세요
+labels: ['🙋 question']
+title: '[Question]: '
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: 궁금한 점을 알려주세요.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: 어떤 문서를 보다가 막히셨는지, 무엇을 하려던 중이었는지 알려주시면 답변이 빨라집니다.
