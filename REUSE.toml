@@ -22,10 +22,22 @@ path = [
   "data/train/aime-selection.json",
   "data/train/outcomes.json",
   "schemas/*.json",
-  "src/ossp_router/resources/*.json",
+  "src/ossp_router/resources/routing-policy.v1.json",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "Copyright 2026 SK TELECOM CO., LTD."
+SPDX-License-Identifier = "Apache-2.0"
+
+# 학습으로 얻은 라우터 아티팩트와 참조 아티팩트.
+[[annotations]]
+path = [
+  "research/artifacts/*.json",
+  "src/ossp_router/resources/cost-calibrated-router.v1.json",
+  "src/ossp_router/resources/family-guard-router.v1.json",
+  "src/ossp_router/resources/feasibility-ladder.v1.json",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Copyright 2026 Scrooge Router contributors"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
