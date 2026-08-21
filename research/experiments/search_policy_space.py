@@ -49,7 +49,6 @@ from research.lab.validation import prompt_family, public_arrays
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build" / "search-policy-space"
 LADDER_PATH = ROOT / "src" / "ossp_router" / "resources" / "feasibility-ladder.v1.json"
-GUARD_RESOURCE = ROOT / "src" / "ossp_router" / "resources" / "selected-router.v1.json"
 HR_PATH = ROOT / "baselines" / "hash-regex-public.v1.json"
 
 
@@ -212,7 +211,7 @@ def main() -> int:
         ),
     }
 
-    print("\n=== H010 public baselines (fixed selection) ===", flush=True)
+    print("\n=== public baselines (fixed selection) ===", flush=True)
     baselines: list[dict[str, Any]] = []
     inputs_by_split = {"train": bundle.inputs, "dev": dev_inputs}
     for name in ("always_light", "prompt_heuristic", "feature_budget"):
@@ -261,7 +260,7 @@ def main() -> int:
             flush=True,
         )
 
-    print("\n=== H020 parent the feasibility ladder (sets the risk budget) ===", flush=True)
+    print("\n=== parent feasibility ladder (sets the risk budget) ===", flush=True)
     ladder = json.loads(LADDER_PATH.read_text(encoding="utf-8"))
     probe = Search(contexts, None)
     parent_row = probe.run("the feasibility ladder", ladder, stage="parent")
@@ -388,8 +387,6 @@ def main() -> int:
         encoding="utf-8",
     )
     art_path.chmod(0o644)
-    GUARD_RESOURCE.write_text(art_path.read_text(encoding="utf-8"), encoding="utf-8")
-    GUARD_RESOURCE.chmod(0o644)
 
     safe = (
         selected["name"].replace("=", "p").replace("|", "_").replace(".", "p").lower()[:48]
@@ -419,7 +416,6 @@ def main() -> int:
             "splits": selected_full,
             "artifact_sha256": sha256_file(art_path),
             "path": str(art_path),
-            "resource": str(GUARD_RESOURCE),
         },
         "parent": public_row(parent_row),
         "baselines": baselines,

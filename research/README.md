@@ -50,6 +50,30 @@ python3 -m research.experiments.lock_final_policy     # Dev 거부권을 걸고 
 `src/ossp_router/resources/`로 복사합니다. 실험 코드는 런타임 트리에 쓰지
 않습니다.
 
+## 소요 시간
+
+공개 Train 1,760문항과 Dev 880문항 기준입니다. 2코어 x86_64에서 잰
+값이므로 절대값보다 상대적인 크기를 참고하십시오.
+
+| 단계 | 대략 |
+| --- | ---: |
+| 자료 준비 (`materialize_public_data.py`) | 수 분 (네트워크 속도에 좌우) |
+| `search_policy_space` | 6분 |
+| `rank_expected_score` | 1초 미만 |
+| `lock_static_caps` | 4분 |
+| `try_family_costing` | 3분 |
+| `select_family_guard` | 3분 |
+| `lock_final_policy` | 9분 |
+| `router_reproduction` | 30초 |
+| `submission_contract` | 25초 |
+
+전체 체인은 25분 정도입니다. 후보 하나마다 흔들린 배치 여러 개에서 배분을
+다시 돌리는 것이 대부분의 시간을 차지합니다.
+
+`lock_final_policy`가 만든 `build/lock-final-policy/family-guard-router.v1.json`은
+`src/ossp_router/resources/family-guard-router.v1.json`과 바이트 단위로
+같아야 합니다.
+
 ## 검증
 
 ```console
@@ -63,6 +87,22 @@ python3 -m research.audit.submission_contract \
 앞은 실제 라우터가 실험이 고른 정책을 그대로 재현하는지 확인하고, 뒤는
 문항 ID와 입력 순서를 바꿔도 선택이 같은지, 등급 사이에 정보가 새지 않는지
 확인합니다.
+
+## 결과가 다르게 나온다면
+
+`router_reproduction`이 `ALL_MATCH False`를 내면 순서대로 확인해 보십시오.
+
+1. **자료가 다른 경우.** `data/public-data.v1.json`에 적힌 문항 수와
+   SHA-256을 `data/materialized/`의 파일과 비교합니다. 원천 자료를 받는
+   과정에서 어긋나면 여기서 드러납니다.
+2. **계열 분류가 어긋난 경우.** 출력의 `family mismatch`가 0이 아니면
+   런타임과 실험의 프롬프트 분류기가 갈라진 것입니다. 둘은 같은 규칙을
+   따라야 합니다.
+3. **아티팩트가 다른 경우.** `match_q`는 맞는데 `match_r`만 틀리면 비용
+   보정이, 반대면 품질 헤드가 다릅니다.
+
+숫자가 소수점 아래에서만 다르다면 numpy 버전을 확인하십시오. 고정 버전은
+`research/requirements.txt`에 있습니다.
 
 ## 공개 범위
 

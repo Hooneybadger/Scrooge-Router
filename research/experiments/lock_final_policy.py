@@ -45,6 +45,13 @@ MULT_GRID = (1.0, 1.5, 2.0, 2.5, 3.0)
 FAST_GRID = (1.03, 1.05, 1.07, 1.08, 1.09, 1.10, 1.11, 1.12)
 BAL_GRID = (1.30, 1.38, 1.45, 1.50)
 MARGIN_FRAC = 0.95
+GUARD_EXPORT_NOTE = (
+    "Runtime artifact for the submitted family-guard router. Every head, the "
+    "recalibration and the Premium path are byte-copied from the feasibility-ladder "
+    "artifact. The only additions are the raised Fast and Balanced caps and the "
+    "per-family accounting multipliers, both selected on Train and confirmed once "
+    "on Dev. No Dev path was opened, hashed, parsed or scored while fitting."
+)
 
 
 def gates(row: Mapping[str, Any]) -> dict[str, bool]:
@@ -173,10 +180,13 @@ def main() -> int:
     art["predicted_caps"]["balanced"] = float(winner["bal_cap"])
     art["runaway_fraction"] = float(derived_runaway_fraction(winner["fast_cap"]))
     art["artifact_type"] = "scrooge-family-guard-router-v1"
+    art["selected_policy"] = "family-guard-router-v1"
+    art["provenance"] = dict(art["provenance"])
+    art["provenance"]["export_note"] = GUARD_EXPORT_NOTE
     if winner["multiplier"] != 1.0:
         art["family_guard"] = {
             "activation": "content-only prompt family bucket",
-            "charter_clip": list(FAMILY_MULT_CLIP),
+            "multiplier_clip": list(FAMILY_MULT_CLIP),
             "multipliers": {RESIDUAL_FAMILY: float(winner["multiplier"])},
             "scope": "fast-and-balanced accounting cost only",
             "selection": "train weighted score, dev veto (zero drift ruin + 95% margin)",
@@ -200,7 +210,7 @@ def main() -> int:
                 "B": "zero inflated drift ruin on both splits",
             },
             "multiplier_grid": list(MULT_GRID),
-            "charter_clip": list(FAMILY_MULT_CLIP),
+            "multiplier_clip": list(FAMILY_MULT_CLIP),
         },
         "winner": {k: v for k, v in winner.items()},
         "static_caps_baseline": {k: v for k, v in baseline.items()},

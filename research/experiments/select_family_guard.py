@@ -44,7 +44,7 @@ from research.experiments.try_family_costing import (
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build" / "select-family-guard"
-PREVIOUS_GUARD_PATH = ROOT / "src" / "ossp_router" / "resources" / "selected-router.v1.json"
+PREVIOUS_GUARD_PATH = ROOT / "build" / "lock-static-caps" / "static-cap-router.v1.json"
 MULT_GRID = (1.25, 1.50, 1.75, 2.00, 2.50, 3.00)
 FAST_GRID = (1.05, 1.07, 1.08, 1.09, 1.10, 1.11, 1.12, 1.15)
 BAL_GRID = (1.38, 1.50)
@@ -213,7 +213,7 @@ def main() -> int:
             "stage_a": "Train full batch + all Train drift views must pass; max Train weighted",
             "stage_b": "Dev scored once, must not increase drift ruin and must raise E[score]",
             "multiplier_range": list(MULT_GRID),
-            "charter_clip": list(FAMILY_MULT_CLIP),
+            "multiplier_clip": list(FAMILY_MULT_CLIP),
         },
         "winner": {k: v for k, v in winner.items()},
         "dev": dev_row,
