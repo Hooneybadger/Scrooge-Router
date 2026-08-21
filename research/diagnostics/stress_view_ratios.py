@@ -37,7 +37,6 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build" / "hidden-diag"
 CANDIDATES = {
     "the feasibility ladder": ROOT / "src" / "ossp_router" / "resources" / "feasibility-ladder.v1.json",
-    "WC": ROOT / "src" / "ossp_router" / "resources" / "wc-selected-router.v1.json",
 }
 
 

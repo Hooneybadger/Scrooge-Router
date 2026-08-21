@@ -59,13 +59,20 @@ python3 -m research.experiments.lock_final_policy     # Dev 거부권을 걸고 
 | --- | ---: |
 | 자료 준비 (`materialize_public_data.py`) | 수 분 (네트워크 속도에 좌우) |
 | `search_policy_space` | 6분 |
-| 나머지 실험 | 각 수 분 |
+| `rank_expected_score` | 1초 미만 |
+| `lock_static_caps` | 4분 |
+| `try_family_costing` | 3분 |
+| `select_family_guard` | 3분 |
+| `lock_final_policy` | 9분 |
 | `router_reproduction` | 30초 |
 | `submission_contract` | 25초 |
 
-`search_policy_space`가 가장 오래 걸립니다. 후보 하나마다 흔들린 배치
-여러 개에서 배분을 다시 돌리기 때문입니다. 나머지 실험은 그 결과를
-재사용합니다.
+전체 체인은 25분 정도입니다. 후보 하나마다 흔들린 배치 여러 개에서 배분을
+다시 돌리는 것이 대부분의 시간을 차지합니다.
+
+`lock_final_policy`가 만든 `build/lock-final-policy/family-guard-router.v1.json`은
+`src/ossp_router/resources/family-guard-router.v1.json`과 바이트 단위로
+같아야 합니다.
 
 ## 검증
 

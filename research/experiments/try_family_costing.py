@@ -48,7 +48,7 @@ from research.lab.validation import prompt_family, public_arrays
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build" / "try-family-costing"
 LADDER_PATH = ROOT / "src" / "ossp_router" / "resources" / "feasibility-ladder.v1.json"
-PREVIOUS_GUARD_PATH = ROOT / "src" / "ossp_router" / "resources" / "selected-router.v1.json"
+PREVIOUS_GUARD_PATH = ROOT / "build" / "lock-static-caps" / "static-cap-router.v1.json"
 RESIDUAL_FAMILY = "other"
 FAMILY_MULT_CLIP = (1.0, 3.0)
 

@@ -38,9 +38,6 @@ def main() -> int:
     ladder = json.loads(
         (ROOT / "src" / "ossp_router" / "resources" / "feasibility-ladder.v1.json").read_text()
     )
-    wc = json.loads(
-        (ROOT / "src" / "ossp_router" / "resources" / "wc-selected-router.v1.json").read_text()
-    )
 
     contexts = {
         "train": SplitContext.build(
@@ -62,7 +59,7 @@ def main() -> int:
     }
 
     ok = True
-    for name, art in (("the feasibility ladder", ladder), ("WC", wc)):
+    for name, art in (("the feasibility ladder", ladder),):
         for split, ctx in contexts.items():
             cache = ctx.prediction_cache(art)
             for tier in TIERS:

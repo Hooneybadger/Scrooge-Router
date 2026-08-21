@@ -49,7 +49,6 @@ from research.lab.validation import prompt_family, public_arrays
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "build" / "search-policy-space"
 LADDER_PATH = ROOT / "src" / "ossp_router" / "resources" / "feasibility-ladder.v1.json"
-GUARD_RESOURCE = ROOT / "src" / "ossp_router" / "resources" / "selected-router.v1.json"
 HR_PATH = ROOT / "baselines" / "hash-regex-public.v1.json"
 
 
@@ -388,8 +387,6 @@ def main() -> int:
         encoding="utf-8",
     )
     art_path.chmod(0o644)
-    GUARD_RESOURCE.write_text(art_path.read_text(encoding="utf-8"), encoding="utf-8")
-    GUARD_RESOURCE.chmod(0o644)
 
     safe = (
         selected["name"].replace("=", "p").replace("|", "_").replace(".", "p").lower()[:48]
@@ -419,7 +416,6 @@ def main() -> int:
             "splits": selected_full,
             "artifact_sha256": sha256_file(art_path),
             "path": str(art_path),
-            "resource": str(GUARD_RESOURCE),
         },
         "parent": public_row(parent_row),
         "baselines": baselines,
