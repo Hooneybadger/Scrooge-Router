@@ -42,9 +42,9 @@ SPDX-License-Identifier: Apache-2.0
 | --- | ---: | ---: | ---: | ---: |
 | Fast | 1.093 | 1.25 | 0.4 | 0.6432 |
 | Balanced | 1.396 | 2.0 | 0.3 | 0.6744 |
-| Premium | 1.901 | 4.0 | 0.3 | 0.6895 |
+| Premium | 2.161 | 4.0 | 0.3 | 0.6997 |
 
-최종 점수 `0.666449`. 세 등급 모두 한도의 95% 아래에서 동작합니다.
+최종 점수 `0.669517`. 세 등급 모두 한도의 95% 아래에서 동작합니다.
 
 실행에는 네트워크도 GPU도 필요하지 않습니다. 표준 라이브러리만 쓰고,
 880문항 한 등급을 처리하는 데 2코어에서 16초, 메모리는 67MB입니다.
@@ -63,7 +63,7 @@ toy 자료로 세 등급의 선택 결과를 만들고 채점합니다.
 
 ```console
 for tier in fast balanced premium; do
-  PYTHONPATH=src python3 -m ossp_router.family_guard_router \
+  PYTHONPATH=src python3 -m ossp_router.budget_brake_router \
     --input data/toy/inputs.json \
     --tier "$tier" \
     --output "build/toy/$tier.json"
@@ -98,11 +98,12 @@ docker build --pull --platform linux/arm64 \
 
 ## 어떻게 동작하나
 
-세 계층으로 나뉩니다. 위 계층은 아래 계층을 바꾸지 않고 예산을 쓰는 방식만
+네 계층으로 나뉩니다. 위 계층은 아래 계층을 바꾸지 않고 예산을 쓰는 방식만
 바꿉니다.
 
 | 계층 | 모듈 | 하는 일 |
 | --- | --- | --- |
+| 4 | `budget_brake_router` | Premium에서 예측 비율이 닿는 동안만 `axk1-think`로 올림 |
 | 3 | `family_guard_router` | 예측이 빗나가는 프롬프트 묶음의 회계 비용을 올림 |
 | 2 | `feasibility_ladder` | Fast 예산을 실행가능성 검사를 거쳐 커밋 |
 | 1 | `cost_calibrated_router` | 프롬프트에서 비용과 정확도 향상을 예측 |
