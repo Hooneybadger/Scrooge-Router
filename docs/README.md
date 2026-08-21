@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## 이 프로젝트
 
-- [architecture.md](architecture.md): 세 계층 구조와 데이터 흐름
+- [architecture.md](architecture.md): 네 계층 구조와 데이터 흐름
 - [decisions.md](decisions.md): 설계 결정과 실패한 시도의 기록
 - [roadmap.md](roadmap.md): 확장 지점과 앞으로 할 일
 - [실험 파이프라인](../research/README.md): 아티팩트를 다시 만드는 절차
