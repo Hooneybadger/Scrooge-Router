@@ -58,12 +58,12 @@ python3 -m research.experiments.lock_final_policy     # Dev 거부권을 걸고 
 | 단계 | 대략 |
 | --- | ---: |
 | 자료 준비 (`materialize_public_data.py`) | 수 분 (네트워크 속도에 좌우) |
-| `search_policy_space` | 수십 분 |
+| `search_policy_space` | 6분 |
 | 나머지 실험 | 각 수 분 |
 | `router_reproduction` | 30초 |
 | `submission_contract` | 25초 |
 
-`search_policy_space`가 오래 걸리는 이유는 후보 하나마다 흔들린 배치
+`search_policy_space`가 가장 오래 걸립니다. 후보 하나마다 흔들린 배치
 여러 개에서 배분을 다시 돌리기 때문입니다. 나머지 실험은 그 결과를
 재사용합니다.
 
