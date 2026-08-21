@@ -6,7 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 # 실험 파이프라인
 
 `src/`의 라우터가 읽는 아티팩트를 만들어낸 코드입니다. 제출 이미지에는
-들어가지 않으며, 여기서만 numpy를 사용합니다.
+들어가지 않으며, 여기서만 numpy와 품질 헤드 적합용 scikit-learn을
+사용합니다.
 
 ```console
 python3 -m pip install -r research/requirements.txt
@@ -38,6 +39,7 @@ python3 -m research.experiments.lock_static_caps      # 정적 상한으로 일�
 python3 -m research.experiments.try_family_costing    # 계열별 비용 회계 시도
 python3 -m research.experiments.select_family_guard   # Train으로 가드 배수 선택
 python3 -m research.experiments.lock_final_policy     # Dev 거부권을 걸고 최종 고정
+python3 -m research.experiments.select_budget_brake   # 고정 Premium 브레이크 증거
 ```
 
 `try_adaptive_guard`는 실패한 시도입니다. 지웠다면 다음 사람이 같은 벽에
@@ -78,8 +80,9 @@ python3 -m research.experiments.lock_final_policy     # Dev 거부권을 걸고 
 
 ```console
 python3 -m research.audit.router_reproduction
+python3 -m research.audit.brake_reproduction
 python3 -m research.audit.submission_contract \
-  --router-module ossp_router.family_guard_router \
+  --router-module ossp_router.budget_brake_router \
   --input data/materialized/dev/inputs.json \
   --report build/contract/report.json
 ```
