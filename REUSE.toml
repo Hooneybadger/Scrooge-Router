@@ -28,6 +28,13 @@ precedence = "override"
 SPDX-FileCopyrightText = "Copyright 2026 SK TELECOM CO., LTD."
 SPDX-License-Identifier = "Apache-2.0"
 
+# 스키마가 여섯 필드만 허용해 파일 안에 SPDX 정보를 넣을 수 없습니다.
+[[annotations]]
+path = ["submission-ossp-skt.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "Copyright 2026 Scrooge Router contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
 # 학습으로 얻은 라우터 아티팩트와 참조 아티팩트.
 [[annotations]]
 path = [
