@@ -41,7 +41,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_*.py'
 
   research:
-    name: 실험 코드 임포트
+    name: 실험 코드 검사
     runs-on: ubuntu-24.04
     steps:
       - name: 저장소 체크아웃
@@ -63,6 +63,22 @@ jobs:
           for path in sorted(pathlib.Path("research").rglob("*.py")):
               importlib.import_module(str(path.with_suffix("")).replace("/", "."))
           PY
+      - name: 연구 테스트
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHONPATH: .:src:baselines
+        run: |
+          umask 0022
+          python -m unittest discover -s tests -p 'test_e*.py'
+          python -m unittest \
+            tests.test_challenger_heads \
+            tests.test_champion_robustness_audit \
+            tests.test_chuf_frozen_runtime_fidelity \
+            tests.test_chuf_predicted_cost_phase2 \
+            tests.test_chuf_tvball_confirmation \
+            tests.test_final_public_refit \
+            tests.test_new_signals \
+            tests.test_v7_challenger
 
   lint:
     name: 정적 검사

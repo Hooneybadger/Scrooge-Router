@@ -126,7 +126,7 @@ JSON에 들어 있습니다.
 | `feasibility-ladder.v1.json` | 2층 |
 | `cost-calibrated-router.v1.json` | 1층 |
 
-세 파일 모두 `src/ossp_router/resources/`에 있습니다. 만들어낸 과정은
+네 파일 모두 `src/ossp_router/resources/`에 있습니다. 만들어낸 과정은
 [실험 파이프라인](../research/README.md)에 있습니다.
 
 ## 확장 지점

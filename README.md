@@ -103,7 +103,7 @@ docker build --pull --platform linux/arm64 \
 
 | 계층 | 모듈 | 하는 일 |
 | --- | --- | --- |
-| 4 | `budget_brake_router` | Premium에서 예측 비율이 닿는 동안만 `axk1-think`로 올림 |
+| 4 | `budget_brake_router` | 치우친 배치의 지출을 조이고 Premium K1 승격을 제한 |
 | 3 | `family_guard_router` | 예측이 빗나가는 프롬프트 묶음의 회계 비용을 올림 |
 | 2 | `feasibility_ladder` | Fast 예산을 실행가능성 검사를 거쳐 커밋 |
 | 1 | `cost_calibrated_router` | 프롬프트에서 비용과 정확도 향상을 예측 |

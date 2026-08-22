@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 PROTOCOL_PATH = ROOT / "research" / "protocols" / "e17-unopened-completion.v1.json"
-PROTOCOL_SHA256 = "2800f4a912cf32b845e01a4d7f104f5c714ed3b6f56f2b5dbbabadad86f18db9"
+PROTOCOL_SHA256 = "5f46957a3ac319c7393956aa568c1865af2de44ad2dbe4d1f713b8123490f017"
 
 
 class E17ProtocolTest(unittest.TestCase):
@@ -33,6 +33,7 @@ class E17ProtocolTest(unittest.TestCase):
         self.assertEqual(payload["arms"]["knobs"]["cond-fast-1.08-0.75"]["fast_cap"], 1.08)
         self.assertEqual(payload["arms"]["knobs"]["leftover-e10-0.73"]["e10_threshold"], 0.73)
         self.assertTrue(payload["arms"]["knobs"]["e9-keep-e14"]["unify_premium"])
+        self.assertIn("higher-order family-combination", payload["metric"]["definition"])
         self.assertLess(float(payload["thresholds"]["dev_delta_min_exclusive"]), 0.0)
 
     def test_protocol_verifies_against_its_canonical_sha(self) -> None:
@@ -109,6 +110,7 @@ class E17RuleTest(unittest.TestCase):
     def test_triple_views_are_complete_not_leftover(self) -> None:
         try:
             from research.lab.serving_replica import (
+                family_combination_views,
                 top3_family_fraction,
                 triple_family_views,
             )
@@ -124,6 +126,15 @@ class E17RuleTest(unittest.TestCase):
         views = triple_family_views(families, digests)
         self.assertEqual(set(views), {"triple:english_multiple_choice+other+word_problem"})
         self.assertEqual(len(views["triple:english_multiple_choice+other+word_problem"]), 60)
+        combinations = family_combination_views(families, digests)
+        self.assertEqual(
+            set(combinations),
+            {"combination:3:english_multiple_choice+other+word_problem"},
+        )
+        self.assertEqual(
+            len(combinations["combination:3:english_multiple_choice+other+word_problem"]),
+            60,
+        )
         official_like = (
             ["korean_multiple_choice"] * 18
             + ["rule_reasoning"] * 16

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from itertools import combinations
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
@@ -163,6 +164,43 @@ def triple_family_views(
                 views[f"triple:{left}+{mid}+{right}"] = tuple(
                     rows[0][:kept] + rows[1][:kept] + rows[2][:kept]
                 )
+    return views
+
+
+def family_combination_views(
+    families: Sequence[str],
+    digests: Sequence[str],
+    *,
+    min_size: int = 3,
+    max_size: Optional[int] = None,
+    min_n: int = VIEW_MIN_N,
+) -> dict[str, Tuple[int, ...]]:
+    """Digest-balanced batches for every eligible family combination."""
+
+    if len(families) != len(digests):
+        raise ProtocolError(
+            "family combination views require aligned families and digests"
+        )
+    buckets: dict[str, list[int]] = {}
+    for index, family in enumerate(families):
+        buckets.setdefault(family, []).append(index)
+    names = sorted(buckets)
+    upper = len(names) if max_size is None else min(int(max_size), len(names))
+    if min_size < 1 or upper < min_size:
+        return {}
+    views: dict[str, Tuple[int, ...]] = {}
+    for size in range(int(min_size), upper + 1):
+        for group in combinations(names, size):
+            rows = [
+                sorted(buckets[name], key=lambda index: digests[index])
+                for name in group
+            ]
+            kept = min(len(row) for row in rows)
+            if kept < min_n:
+                continue
+            views[f"combination:{size}:{'+'.join(group)}"] = tuple(
+                index for row in rows for index in row[:kept]
+            )
     return views
 
 
@@ -610,6 +648,7 @@ __all__ = (
     "conditioned_fast_cap",
     "demote_residual_upgrades",
     "digest_views",
+    "family_combination_views",
     "family_views",
     "json_float",
     "max_family_fraction",

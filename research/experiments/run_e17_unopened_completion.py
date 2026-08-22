@@ -39,6 +39,7 @@ def print_summary(report) -> None:
             f"train_delta={block['train_delta']:+.8f} "
             f"dev_delta={block['dev_delta']:+.8f} "
             f"official_identical={block['official_identical']} "
+            f"combinations={block['n_combination_failures']} "
             f"triples={block['n_triple_failures']} "
             f"passed={block['passed']} failures={block['failures']}",
             flush=True,
@@ -64,10 +65,10 @@ def print_summary(report) -> None:
         extra = len(block["fast_view_failures"]) - len(shown)
         if extra:
             print(f"  fast fail … {extra} more", flush=True)
-        if block["premium_residual_failures"]:
-            for row in block["premium_residual_failures"]:
+        if block["premium_view_failures"]:
+            for row in block["premium_view_failures"]:
                 print(
-                    f"  residual fail {row['view']} "
+                    f"  premium fail {row['view']} "
                     f"{row['actual_ratio']:.6f}/{row['inflated_ratio']:.6f}",
                     flush=True,
                 )

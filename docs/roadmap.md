@@ -46,7 +46,8 @@ SPDX-License-Identifier: Apache-2.0
 
 `budget_brake_router`의 승격 루프가 예측 품질 순서와 배치 예측 비율
 브레이크만 봅니다. 개수 상한이나 제외 계열은 아티팩트에 있으므로 코드를
-고치지 않고 바꿀 수 있습니다. Fast와 Balanced는 이 계층을 거치지 않습니다.
+고치지 않고 바꿀 수 있습니다. 이 Premium 승격 루프는 Fast와 Balanced에
+적용되지 않습니다.
 
 ## 다른 모델 목록에 적용하기
 

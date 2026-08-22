@@ -50,6 +50,7 @@ from research.lab.serving_replica import (
     ServingReplica,
     SplitReplica,
     composition_views,
+    family_combination_views,
     json_float,
     max_family_fraction,
     model_counts,
@@ -59,7 +60,6 @@ from research.lab.serving_replica import (
     score_models,
     top2_family_fraction,
     top3_family_fraction,
-    triple_family_views,
 )
 
 
@@ -129,7 +129,6 @@ ARM_KNOBS: Mapping[str, ArmKnobs] = {
 ARMS: Tuple[str, ...] = (BASELINE_ARM,) + CANDIDATE_ARMS
 AUDIT_RELATIVE = "build/run-e17-unopened-completion/episode-audit.json"
 REPORT_RELATIVE = "build/run-e17-unopened-completion/report.json"
-TOP3_MODES = frozenset({"top3"})
 
 
 def protocol_sha256(protocol: Mapping[str, Any]) -> str:
@@ -323,22 +322,14 @@ def allocate_arm(
 def binding_views(split: SplitReplica) -> dict[str, Tuple[int, ...]]:
     views = dict(composition_views(split))
     views.update(pair_family_views(split.families, split.digests))
+    views.update(
+        family_combination_views(
+            split.families,
+            split.digests,
+            min_size=3,
+        )
+    )
     return views
-
-
-def _score_tier(split: SplitReplica, indexes: Sequence[int], models: Sequence[str]) -> dict[str, Any]:
-    scored = score_models(split.scores, split.costs, indexes, models)
-    inflated = float(scored["actual_ratio"]) * INFLATION
-    official_cap = float(OFFICIAL_CAPS["fast"])
-    return {
-        "actual_ratio": scored["actual_ratio"],
-        "counts": scored["counts"],
-        "inflated_ratio": json_float(inflated),
-        "n": scored["n"],
-        "quality": scored["quality"],
-        "ruin": bool(float(scored["actual_ratio"]) > official_cap + 1e-15),
-        "ruin_inflated": bool(inflated > official_cap + 1e-15),
-    }
 
 
 def evaluate_arm_on_split(
@@ -350,7 +341,7 @@ def evaluate_arm_on_split(
     views = binding_views(split)
     stress: dict[str, Any] = {}
     fast_view_failures = []
-    premium_residual_failures = []
+    premium_view_failures = []
     knobs = arm_knobs(arm)
     for name, indexes in views.items():
         view_sel = allocate_arm(replica, split, indexes, arm)
@@ -389,34 +380,24 @@ def evaluate_arm_on_split(
                         "view": name,
                     }
                 )
-            if (
-                tier == "premium"
-                and name == f"family:{RESIDUAL_FAMILY}"
-                and (ruin or ruin_inflated)
-            ):
-                premium_residual_failures.append(
+            if tier == "premium" and (ruin or ruin_inflated):
+                premium_view_failures.append(
                     {
                         "actual_ratio": scored["actual_ratio"],
                         "inflated_ratio": json_float(inflated),
                         "view": name,
                     }
                 )
-    triple_failures = []
-    for name, indexes in triple_family_views(split.families, split.digests).items():
-        view_sel = allocate_arm(replica, split, indexes, arm)
-        families = [split.families[index] for index in indexes]
-        scored = _score_tier(split, indexes, view_sel["fast"])
-        if scored["ruin"] or scored["ruin_inflated"]:
-            triple_failures.append(
-                {
-                    "actual_ratio": scored["actual_ratio"],
-                    "inflated_ratio": scored["inflated_ratio"],
-                    "max_family_fraction": json_float(max_family_fraction(families)),
-                    "top2_family_fraction": json_float(top2_family_fraction(families)),
-                    "top3_family_fraction": json_float(top3_family_fraction(families)),
-                    "view": name,
-                }
-            )
+    combination_failures = [
+        row
+        for row in fast_view_failures
+        if str(row["view"]).startswith("combination:")
+    ]
+    triple_failures = [
+        row
+        for row in combination_failures
+        if str(row["view"]).startswith("combination:3:")
+    ]
     residual_indexes = [
         index for index, family in enumerate(split.families) if family == RESIDUAL_FAMILY
     ]
@@ -456,12 +437,13 @@ def evaluate_arm_on_split(
             "inflated_ratio": json_float(float(residual_official["actual_ratio"]) * INFLATION),
             "n": residual_official["n"],
         },
-        "premium_residual_failures": premium_residual_failures,
+        "premium_view_failures": premium_view_failures,
         "residual_fraction": json_float(split.residual_frac),
         "residual_only_premium": residual_view,
         "selections": {tier: list(selections[tier]) for tier in TIERS},
         "stress": stress,
         "top3_family_fraction": json_float(top3_family_fraction(split.families)),
+        "combination_view_failures": combination_failures,
         "triple_view_failures": triple_failures,
     }
 
@@ -559,9 +541,12 @@ def assemble(
         fast_view_fail = list(results[arm]["train"]["fast_view_failures"]) + list(
             results[arm]["dev"]["fast_view_failures"]
         )
-        residual_fail = list(results[arm]["train"]["premium_residual_failures"]) + list(
-            results[arm]["dev"]["premium_residual_failures"]
+        premium_view_fail = list(results[arm]["train"]["premium_view_failures"]) + list(
+            results[arm]["dev"]["premium_view_failures"]
         )
+        combination_fail = list(
+            results[arm]["train"]["combination_view_failures"]
+        ) + list(results[arm]["dev"]["combination_view_failures"])
         triple_fail = list(results[arm]["train"]["triple_view_failures"]) + list(
             results[arm]["dev"]["triple_view_failures"]
         )
@@ -570,10 +555,8 @@ def assemble(
             failures.append("official_safety")
         if fast_view_fail:
             failures.append("fast_view_safety")
-        if residual_fail:
-            failures.append("residual_premium_cap")
-        if arm_knobs(arm).fast_mode in TOP3_MODES and triple_fail:
-            failures.append("triple_view_safety")
+        if premium_view_fail:
+            failures.append("premium_view_safety")
         if dev_delta <= float(thresholds["dev_delta_min_exclusive"]):
             failures.append("dev_veto")
         passed = not failures
@@ -583,6 +566,7 @@ def assemble(
             "failures": failures,
             "fast_view_failures": fast_view_fail,
             "knobs": dict(results[arm]["train"]["knobs"]),
+            "n_combination_failures": len(combination_fail),
             "n_triple_failures": len(triple_fail),
             "official_failures": official_fail,
             "official_identical": bool(official_identical),
@@ -591,7 +575,7 @@ def assemble(
                 for label in ("train", "dev")
             },
             "passed": passed,
-            "premium_residual_failures": residual_fail,
+            "premium_view_failures": premium_view_fail,
             "residual_only_premium": {
                 label: results[arm][label]["residual_only_premium"]
                 for label in ("train", "dev")
