@@ -52,7 +52,10 @@ class DataScaleSeedTest(unittest.TestCase):
         self.assertEqual(str(derivation["core_sha256"]), SCALE_CORE)
 
     def test_collision_fails_closed(self) -> None:
-        from research.lab.data_scale_diagnostic import ProtocolError
+        try:
+            from research.lab.data_scale_diagnostic import ProtocolError
+        except ImportError:
+            self.skipTest("numpy / sklearn / research stack is not installed")
 
         derive_fresh_seeds = self._import()
         with self.assertRaises(ProtocolError):

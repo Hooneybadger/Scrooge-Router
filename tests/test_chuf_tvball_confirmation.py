@@ -20,6 +20,23 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+_PUBLIC_TRAIN_INPUTS = ROOT / "data" / "materialized" / "train" / "inputs.json"
+
+
+def _require_research_stack() -> None:
+    try:
+        import numpy  # noqa: F401
+    except ImportError:
+        raise unittest.SkipTest("numpy / research stack is not installed")
+
+
+def _require_public_inputs(test: unittest.TestCase) -> None:
+    if not _PUBLIC_TRAIN_INPUTS.is_file():
+        test.skipTest("pinned public Train+Dev files are not materialized")
+
+
+_require_research_stack()
+
 
 E1F_CORE = "f4cca0d425b47bda6e42be9b5c11b64e3cf9c57efd2810f11b22b1bd6051ba79"
 EXPLICIT_FRESH_SEEDS = (
@@ -68,6 +85,7 @@ class SeedDerivationTests(unittest.TestCase):
 
 class EpsilonAndTvTests(unittest.TestCase):
     def test_epsilon_from_inputs_matches_pin(self) -> None:
+        _require_public_inputs(self)
         from research.lab.chuf_tvball_confirmation import (
             EXPECTED_EPSILON,
             epsilon_from_input_paths,
@@ -210,6 +228,7 @@ class GateBoundaryTests(unittest.TestCase):
 
 class ProtocolHashTests(unittest.TestCase):
     def test_canonical_hash_is_deterministic(self) -> None:
+        _require_public_inputs(self)
         from research.lab.chuf_tvball_confirmation import (
             EXPECTED_PROTOCOL_SHA256,
             PROTOCOL_PATH,
@@ -287,7 +306,8 @@ class RunnerRefuseTests(unittest.TestCase):
                     "e1f_source_sha256": "0" * 64,
                 }
             )
-        verify_protocol(load_protocol(PROTOCOL_PATH), EXPECTED_PROTOCOL_SHA256)
+        if _PUBLIC_TRAIN_INPUTS.is_file():
+            verify_protocol(load_protocol(PROTOCOL_PATH), EXPECTED_PROTOCOL_SHA256)
 
     def test_overwrite_and_e1f_path_refused(self) -> None:
         from research.experiments.confirm_chuf_tvball import main

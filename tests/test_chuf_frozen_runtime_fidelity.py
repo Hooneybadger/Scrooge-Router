@@ -21,6 +21,23 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+_PUBLIC_TRAIN_INPUTS = ROOT / "data" / "materialized" / "train" / "inputs.json"
+
+
+def _require_research_stack() -> None:
+    try:
+        import numpy  # noqa: F401
+    except ImportError:
+        raise unittest.SkipTest("numpy / research stack is not installed")
+
+
+def _require_public_inputs(test: unittest.TestCase) -> None:
+    if not _PUBLIC_TRAIN_INPUTS.is_file():
+        test.skipTest("pinned public Train+Dev files are not materialized")
+
+
+_require_research_stack()
+
 
 EXPLICIT_FIDELITY_SEEDS = (
     1043203741,
@@ -106,6 +123,7 @@ class ArtifactAndPinTests(unittest.TestCase):
         self.assertTrue(snap["allocator"]["split_local_batch"])
 
     def test_comparator_pins_are_reproduction_not_thresholds(self) -> None:
+        _require_public_inputs(self)
         from research.lab.chuf_frozen_runtime_fidelity import (
             COMPARATOR_PINS,
             build_canonical_protocol,
@@ -274,6 +292,7 @@ class QualityGateTests(unittest.TestCase):
 
 class ProtocolHashTests(unittest.TestCase):
     def test_canonical_hash_is_deterministic(self) -> None:
+        _require_public_inputs(self)
         from research.lab.chuf_frozen_runtime_fidelity import (
             EXPECTED_PROTOCOL_SHA256,
             PROTOCOL_PATH,
@@ -363,7 +382,8 @@ class RunnerRefuseTests(unittest.TestCase):
                     "split_local_batch": True,
                 }
             )
-        verify_protocol(load_protocol(PROTOCOL_PATH), EXPECTED_PROTOCOL_SHA256)
+        if _PUBLIC_TRAIN_INPUTS.is_file():
+            verify_protocol(load_protocol(PROTOCOL_PATH), EXPECTED_PROTOCOL_SHA256)
 
     def test_overwrite_and_foreign_paths_refused(self) -> None:
         from research.experiments.run_chuf_frozen_runtime_fidelity import main

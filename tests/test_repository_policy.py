@@ -113,6 +113,7 @@ LOCAL_GENERATED_PREFIXES = (
     ("dist",),
     ("data", "cache"),
     ("data", "materialized"),
+    ("research", "local"),
 )
 
 
@@ -618,6 +619,7 @@ class RepositoryPolicyTest(unittest.TestCase):
         text = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
         for pattern in (
             "/.local-data/",
+            "/research/local/",
             "/.venv-data/",
             "/operator-state/",
             "/data/cache/",

@@ -27,6 +27,23 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+_PUBLIC_TRAIN_INPUTS = ROOT / "data" / "materialized" / "train" / "inputs.json"
+
+
+def _require_research_stack() -> None:
+    try:
+        import numpy  # noqa: F401
+    except ImportError:
+        raise unittest.SkipTest("numpy / research stack is not installed")
+
+
+def _require_public_inputs(test: unittest.TestCase) -> None:
+    if not _PUBLIC_TRAIN_INPUTS.is_file():
+        test.skipTest("pinned public Train+Dev files are not materialized")
+
+
+_require_research_stack()
+
 
 EXPLICIT_CHALLENGER_SEEDS = (
     1726202894,
@@ -608,6 +625,7 @@ class CompileAndAllocatorTests(unittest.TestCase):
 
 class ProtocolAndGateTests(unittest.TestCase):
     def test_canonical_hash_and_pins(self) -> None:
+        _require_public_inputs(self)
         from research.lab.v7_challenger import (
             EXPECTED_PROTOCOL_SHA256,
             FALLBACK_DEV_OFFICIAL,

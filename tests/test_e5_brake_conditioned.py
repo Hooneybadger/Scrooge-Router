@@ -45,10 +45,13 @@ class E5SeedDerivationTest(unittest.TestCase):
         self.assertEqual(derived, E5_SEALED_SEEDS)
 
     def test_collision_fails_closed(self) -> None:
-        from research.lab.e5_brake_conditioned import (
-            ProtocolError,
-            derive_fresh_seeds,
-        )
+        try:
+            from research.lab.e5_brake_conditioned import (
+                ProtocolError,
+                derive_fresh_seeds,
+            )
+        except ImportError:
+            self.skipTest("research E5 stack is not installed")
 
         self.assertEqual(
             derive_fresh_seeds(E5_PREFIX, E5_CORE, 5, []),

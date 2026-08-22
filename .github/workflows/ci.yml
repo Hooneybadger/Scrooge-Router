@@ -52,8 +52,9 @@ jobs:
           python-version: '3.11'
       - name: 의존성 설치
         run: python -m pip install -r research/requirements.txt
-      # 실험 실행은 공개 데이터 materialization이 필요하므로 CI에서는
-      # 모듈이 깨지지 않았는지까지만 확인합니다.
+      # 실험 실행은 공개 데이터 materialization이 필요합니다. CI에서는
+      # 모듈 임포트와 합성 픽스처 검사만 돌리고, 공개 입력이 필요한
+      # 프로토콜 해시 검사는 건너뜁니다.
       - name: 모듈 임포트 확인
         env:
           PYTHONPATH: .:src:baselines

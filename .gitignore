@@ -6,6 +6,7 @@
 .env.*
 !.env.example
 /.local-data/
+/research/local/
 /operator-state/
 *.egg-info/
 *.key

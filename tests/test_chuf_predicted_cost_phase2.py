@@ -21,6 +21,23 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+_PUBLIC_TRAIN_INPUTS = ROOT / "data" / "materialized" / "train" / "inputs.json"
+
+
+def _require_research_stack() -> None:
+    try:
+        import numpy  # noqa: F401
+    except ImportError:
+        raise unittest.SkipTest("numpy / research stack is not installed")
+
+
+def _require_public_inputs(test: unittest.TestCase) -> None:
+    if not _PUBLIC_TRAIN_INPUTS.is_file():
+        test.skipTest("pinned public Train+Dev files are not materialized")
+
+
+_require_research_stack()
+
 
 EXPLICIT_RISK_SEEDS = (
     1961852001,
@@ -74,6 +91,7 @@ class SeedDerivationTests(unittest.TestCase):
 
 class EpsilonAndTvTests(unittest.TestCase):
     def test_epsilon_from_inputs_matches_pin(self) -> None:
+        _require_public_inputs(self)
         from research.lab.chuf_predicted_cost_phase2 import epsilon_from_input_paths
 
         self.assertEqual(epsilon_from_input_paths(), 0.014204545454545449)
@@ -195,6 +213,7 @@ class ArtifactAndThresholdTests(unittest.TestCase):
         self.assertFalse(snap["allocator"]["fold_local_rebuy"])
 
     def test_thresholds_exclude_dev_and_champion_abs(self) -> None:
+        _require_public_inputs(self)
         from research.lab.chuf_predicted_cost_phase2 import build_canonical_protocol
 
         thresholds = build_canonical_protocol()["thresholds"]
@@ -208,6 +227,7 @@ class ArtifactAndThresholdTests(unittest.TestCase):
 
 class ProtocolHashTests(unittest.TestCase):
     def test_canonical_hash_is_deterministic(self) -> None:
+        _require_public_inputs(self)
         from research.lab.chuf_predicted_cost_phase2 import (
             EXPECTED_PROTOCOL_SHA256,
             PROTOCOL_PATH,
@@ -283,7 +303,8 @@ class RunnerRefuseTests(unittest.TestCase):
                     "pins": load_protocol(PROTOCOL_PATH)["pins"],
                 }
             )
-        verify_protocol(load_protocol(PROTOCOL_PATH), EXPECTED_PROTOCOL_SHA256)
+        if _PUBLIC_TRAIN_INPUTS.is_file():
+            verify_protocol(load_protocol(PROTOCOL_PATH), EXPECTED_PROTOCOL_SHA256)
 
     def test_overwrite_and_foreign_paths_refused(self) -> None:
         from research.experiments.run_chuf_predicted_cost_phase2 import main
