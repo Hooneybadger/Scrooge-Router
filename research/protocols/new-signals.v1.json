@@ -1,0 +1,160 @@
+{
+  "arms": {
+    "baseline": {
+      "definition": "Incumbent recipe refit per fold: unweighted closed-form ridge alpha=100 on standardized 14-d structural features, direct target scores[:,1]-scores[:,0]. Identical to challenger-heads-v1 baseline.",
+      "name": "incumbent-refit"
+    },
+    "candidates": [
+      {
+        "block": "ast (16 dims, log1p counts; parsed on fenced code content when present else the full text; parse failure yields all-zero block with ast_parse_ok=0)",
+        "features": [
+          "ast_parse_ok",
+          "n_function_defs",
+          "n_class_defs",
+          "n_loops",
+          "n_if",
+          "n_asserts",
+          "n_try",
+          "n_comprehensions",
+          "n_lambda",
+          "n_calls",
+          "n_returns",
+          "n_binops",
+          "n_comparisons",
+          "n_string_literals",
+          "n_imports",
+          "max_depth"
+        ],
+        "name": "signals-ast",
+        "parser": "stdlib ast module only"
+      },
+      {
+        "block": "numeric (6 dims from the full text)",
+        "features": [
+          "n_numbers_log1p",
+          "log10_max_magnitude",
+          "n_decimals_log1p",
+          "n_percentages_log1p",
+          "has_currency",
+          "mean_digit_run_length"
+        ],
+        "name": "signals-numeric"
+      },
+      {
+        "block": "choice (4 dims from the full text)",
+        "features": [
+          "n_choice_markers_log1p",
+          "n_question_marks_log1p",
+          "has_choice_block",
+          "n_options_log1p"
+        ],
+        "name": "signals-choice"
+      }
+    ],
+    "combined": {
+      "definition": "All three blocks appended at once (40-d total).",
+      "name": "signals-all"
+    }
+  },
+  "context_frozen": {
+    "allocator": "Identical to challenger-heads-v1: guarded costs frozen, select_fast_balanced with bundled caps/runaway/max_upgrade_fraction; premium untouched and cancels in paired deltas.",
+    "extractor_contract": "Every extractor is pure stdlib (re + ast) so a passing candidate can be exported to src/ossp_router without new dependencies. Extractors are computed once per episode and cached."
+  },
+  "decision_reasons": {
+    "fail": "No new signal block cleared the pre-registered gates on fresh seeds. The 14-d structural feature family stays champion and issue #21 guidance is updated accordingly.",
+    "pass": "A signal block beat the incumbent through the actual serving path on fresh seeds. This opens a promotion window only; stdlib runtime export requires a separate sealed integration protocol with feature-parity tests."
+  },
+  "decisions": {
+    "fail": "record-new-signals-no-promote-current-runtime",
+    "pass": "record-new-signals-promotion-window-open"
+  },
+  "epsilon": 0.014204545454545449,
+  "experiment": "new-signals-v1",
+  "fresh_seeds": [
+    308984772,
+    213236528,
+    2121011317,
+    970535163,
+    825752938
+  ],
+  "metric": {
+    "delta_definition": "Paired official weighted score difference (arm minus baseline): 0.4*deltaQ_fast + 0.3*deltaQ_balanced pooled per seed; premium cancels.",
+    "family_decomposition": "delta_f = 0.4*(n_f/N)*meanDiffFast_f + 0.3*(n_f/N)*meanDiffBalanced_f."
+  },
+  "motivation": {
+    "gap": "Issue #21 guidance (objective change) is exhausted by E1-E1F; challenger-heads showed external model classes lose with existing features. The one untested direction is genuinely new signal sources as additional extractor blocks, not new estimators.",
+    "precedent": "E1 ran four objective variants in one sealed protocol; this runs four feature-block variants under the same discipline."
+  },
+  "multi_arm_rule": "If several arms clear every gate, the window opens for the arm with the highest mean delta; ties resolve toward the smaller block (ast < numeric < choice < all).",
+  "output": {
+    "audit_relative": "build/run-new-signals/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-new-signals/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "new-signals-v1",
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; collision fails closed.",
+    "core_sha256": "491649947238e5c6d11020eb8dc5c969fe10634a85bde82b9a281a1de0403064",
+    "forbidden_previous_seeds": [
+      20260821,
+      20260822,
+      20260823,
+      20260824,
+      20260825,
+      1524653244,
+      655399222,
+      544868342,
+      1444644023,
+      2132086428,
+      292577053,
+      1003090710,
+      253011083,
+      534284889,
+      2049515330,
+      515672025,
+      572878001,
+      763133369,
+      68726617,
+      1988695219,
+      929558432,
+      1924177588,
+      1558982291,
+      995925147,
+      1201315901,
+      850766810,
+      462283710,
+      130672035,
+      733125616,
+      733043265,
+      1283801968,
+      498402659
+    ],
+    "n": 5,
+    "prefix": "scrooge-new-signals-v1",
+    "skip_digest_on_collision": false
+  },
+  "thresholds": {
+    "actual_ratio_limits": {
+      "balanced": 1.9,
+      "fast": 1.1875
+    },
+    "mean_delta_min": 0.002,
+    "tvball_worst_min": -0.003,
+    "view_min_n": 20,
+    "worst_seed_delta_min_exclusive": 0.0
+  },
+  "tv_ball": {
+    "formula": "tv_worst = pooled_delta + epsilon * (min_family_delta - max_family_delta)",
+    "n_ge": 20
+  }
+}

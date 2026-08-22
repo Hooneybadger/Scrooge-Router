@@ -125,7 +125,7 @@ docker build --pull --platform linux/arm64 \
 
 프로젝트를 이해하려면 다음 순서로 읽으면 됩니다.
 
-- [아키텍처](docs/architecture.md): 세 계층과 데이터 흐름
+- [아키텍처](docs/architecture.md): 네 계층과 데이터 흐름
 - [설계 결정 기록](docs/decisions.md): 왜 그 값을 골랐는지, 무엇이 실패했는지
 - [로드맵과 확장 지점](docs/roadmap.md): 다른 상황에 적용하는 방법
 - [실험 파이프라인](research/README.md): 아티팩트를 다시 만드는 절차

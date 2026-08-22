@@ -1,0 +1,72 @@
+{
+  "axes": {
+    "h1_ranking": "Selected versus leftover realized Light→AX31 (Fast/Balanced) and AX31→K1 (Premium). Weak item ranking is not a bankruptcy failure.",
+    "h2_family": "Per-family official-weighted quality versus always-light; TV-ball uses the Train–Dev family-mix radius.",
+    "h3_k1_tail": "Selected Premium K1 realized ΔK versus eligible-unbought AX31, plus selected cost quartiles.",
+    "h4_split_shift": "Train versus Dev official scores and residual-family mix. Observational only; heads are Train-fitted.",
+    "leftover": "Positive predicted Fast/Balanced uplift left on Light, and Premium brake binding (eligible unbought).",
+    "oracle": "Same-budget and operating-limit oracles. Observational.",
+    "pin": "Dev official score must match the shipped replay pin.",
+    "replica_fidelity": "Serving replica (select_fast_balanced + promote_premium_brake) must match budget_brake_router.make_submission.",
+    "safety": "Train/Dev official ratios under 95% of the official cap; composition views must not ruin even after 1.054 inflation."
+  },
+  "context_frozen": {
+    "artifact": "src/ossp_router/resources/budget-brake-router.v1.json",
+    "note": "No head is refit. Caps, family-guard multipliers, runaway and brake constants stay shipped.",
+    "router": "ossp_router.budget_brake_router"
+  },
+  "decision_reasons": {
+    "conditionally_robust": "Safety, pin and replica fidelity passed, but ranking leftover or a family view is the source of robustness. Keep the current runtime.",
+    "fragile": "A binding axis failed (pin, replica fidelity, official/view ruin, or TV-ball versus always-light). Current runtime is not certified robust by this audit.",
+    "robust": "Binding safety axes passed and H1–H3 are not conditional. Current runtime is a robust champion on the sealed axes."
+  },
+  "decisions": {
+    "conditionally_robust": "record-champion-audit-conditionally-robust-current-runtime",
+    "fragile": "record-champion-audit-fragile-current-runtime",
+    "robust": "record-champion-audit-robust-current-runtime"
+  },
+  "epsilon": 0.014204545454545449,
+  "epsilon_formula": "0.5 * sum_f abs(p_train_f - p_dev_f) from materialized inputs family counts only",
+  "experiment": "champion-robustness-audit-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "motivation": {
+    "note": "Public-team red team applied H1–H4 to competitors, not to Scrooge. Quality-head search is exhausted. This audit asks whether the shipped runtime is a robust champion.",
+    "quality_search_exhausted": [
+      "objective",
+      "model-class",
+      "signal-source",
+      "data-scale"
+    ]
+  },
+  "output": {
+    "audit_relative": "build/run-champion-robustness-audit/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-champion-robustness-audit/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "promotion": false,
+  "protocol_id": "champion-robustness-audit-v1",
+  "schema_version": 1,
+  "stress_views": {
+    "definition": "full, digest-even/odd, digest-head/tail-200, and each prompt_family with n>=20. Allocator is replayed on the view.",
+    "inflation": 1.054,
+    "view_min_n": 20
+  },
+  "thresholds": {
+    "h1_pearson_min": 0.05,
+    "h1_selected_gap_min": 0.02,
+    "h2_family_drop_max": 0.003,
+    "h2_tvball_min": -0.003,
+    "leftover_unused_min": 80
+  }
+}

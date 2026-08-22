@@ -3,8 +3,10 @@
 
 """Contract tests for the Premium predicted-budget brake overlay.
 
-Fast and Balanced must stay bit-identical to family_guard_router. Premium is
-the parent two-action set plus the frozen brake loop. No Dev outcome is read.
+Fast and Balanced match family_guard_router on mixed batches. A
+family-majority Fast batch may tighten the predicted cap. Premium is
+the parent two-action set plus the frozen brake loop. No Dev outcome
+is read.
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ import pathlib
 import unittest
 
 from ossp_router import budget_brake_router, family_guard_router
+from ossp_router.feasibility_ladder import _select_premium_configured
 from ossp_router.protocol import (
     MODEL_IDS,
     TIERS,
@@ -166,6 +169,11 @@ class SubmissionTest(unittest.TestCase):
         self.inputs = load_input(TOY_INPUTS)
 
     def test_fast_and_balanced_match_family_guard(self) -> None:
+        families = [
+            family_guard_router.prompt_family(episode)
+            for episode in self.inputs.episodes
+        ]
+        fast_guard = budget_brake_router.fast_family_composition_guard(families)
         for tier in ("fast", "balanced"):
             with self.subTest(tier=tier):
                 overlay = budget_brake_router.make_submission(
@@ -174,10 +182,13 @@ class SubmissionTest(unittest.TestCase):
                 parent = family_guard_router.make_submission(
                     self.inputs, self.policy, self.parent, tier
                 )
-                self.assertEqual(
-                    [d.model_id for d in overlay.submission.decisions],
-                    [d.model_id for d in parent.submission.decisions],
-                )
+                if tier == "balanced" or not fast_guard:
+                    self.assertEqual(
+                        [d.model_id for d in overlay.submission.decisions],
+                        [d.model_id for d in parent.submission.decisions],
+                    )
+                else:
+                    self.assertAlmostEqual(overlay.predicted_cap, 1.07)
 
     def test_fast_and_balanced_never_pick_k1(self) -> None:
         for tier in ("fast", "balanced"):
@@ -339,6 +350,283 @@ class PrefilterTest(unittest.TestCase):
         for index, model_id in enumerate(full):
             if index not in eligible:
                 self.assertEqual(model_id, parent[index])
+
+
+class PremiumParentGuardTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.artifact = budget_brake_router.load_bundled_artifact()
+        self.residual = Episode(episode_id="residual", prompt="zzz qqq")
+        self.word = Episode(
+            episode_id="word", prompt="How many apples are left over?"
+        )
+        self.costs = (1.0, 2.0, 2.2)
+
+    def test_residual_ax31_increment_uses_shipped_multiplier(self) -> None:
+        self.assertEqual(
+            family_guard_router.prompt_family(self.residual),
+            family_guard_router.RESIDUAL_FAMILY,
+        )
+        multiplier = family_guard_router.guard_multiplier(
+            self.residual, self.artifact.family_guard
+        )
+        self.assertEqual(multiplier, 2.5)
+        guarded = budget_brake_router.guard_premium_parent_costs(
+            self.residual, self.costs, self.artifact
+        )
+        self.assertEqual(guarded, (1.0, 3.5, 2.2))
+
+    def test_non_residual_parent_costs_are_unchanged(self) -> None:
+        self.assertEqual(
+            family_guard_router.prompt_family(self.word), "word_problem"
+        )
+        guarded = budget_brake_router.guard_premium_parent_costs(
+            self.word, self.costs, self.artifact
+        )
+        self.assertEqual(guarded, self.costs)
+
+    def test_parent_row_helper_matches_manual_guard(self) -> None:
+        policy = load_bundled_policy()
+        uplift, raw = budget_brake_router.premium_prediction_row(
+            self.residual, policy, self.artifact
+        )
+        parent_uplift, parent_costs = budget_brake_router.premium_parent_prediction_row(
+            self.residual, policy, self.artifact
+        )
+        self.assertEqual(parent_uplift, uplift)
+        self.assertEqual(
+            parent_costs,
+            budget_brake_router.guard_premium_parent_costs(
+                self.residual, raw, self.artifact
+            ),
+        )
+        self.assertEqual(parent_costs[2], raw[2])
+
+    def test_parent_costs_require_three_models(self) -> None:
+        with self.assertRaises(ProtocolError):
+            budget_brake_router.guard_premium_parent_costs(
+                self.residual, (1.0, 2.0), self.artifact
+            )
+
+    def test_residual_multiplier_override_stays_inside_clip(self) -> None:
+        guarded = budget_brake_router.guard_premium_parent_costs(
+            self.residual,
+            self.costs,
+            self.artifact,
+            residual_multiplier=3.0,
+        )
+        self.assertEqual(guarded, (1.0, 4.0, 2.2))
+        unchanged = budget_brake_router.guard_premium_parent_costs(
+            self.word,
+            self.costs,
+            self.artifact,
+            residual_multiplier=3.0,
+        )
+        self.assertEqual(unchanged, self.costs)
+        with self.assertRaises(ProtocolError):
+            budget_brake_router.guard_premium_parent_costs(
+                self.residual,
+                self.costs,
+                self.artifact,
+                residual_multiplier=3.25,
+            )
+
+    def test_brake_guard_inflates_residual_k1_only(self) -> None:
+        guarded = budget_brake_router.guard_premium_brake_costs(
+            self.residual, self.costs, self.artifact
+        )
+        self.assertEqual(guarded[0], 1.0)
+        self.assertEqual(guarded[1], 2.0)
+        self.assertAlmostEqual(guarded[2], 2.5)
+        unchanged = budget_brake_router.guard_premium_brake_costs(
+            self.word, self.costs, self.artifact
+        )
+        self.assertEqual(unchanged, self.costs)
+
+    def test_residual_denylist_blocks_k1(self) -> None:
+        parent = [_AX31]
+        selected = budget_brake_router.promote_premium_brake(
+            parent,
+            [0.9],
+            [family_guard_router.RESIDUAL_FAMILY],
+            ((1.0, 2.0, 2.05),),
+            ("aa",),
+            {
+                **_block(),
+                "denylist_families": list(_block()["denylist_families"])
+                + [family_guard_router.RESIDUAL_FAMILY],
+            },
+        )
+        self.assertEqual(selected, (_AX31,))
+
+
+class ConditionalPremiumGuardTest(unittest.TestCase):
+    def test_threshold_is_three_quarters(self) -> None:
+        self.assertEqual(
+            budget_brake_router.CONDITIONAL_PREMIUM_RESIDUAL_THRESHOLD, 0.75
+        )
+        residual = family_guard_router.RESIDUAL_FAMILY
+        self.assertFalse(
+            budget_brake_router.premium_residual_composition_guard(
+                [residual] * 2 + ["word_problem"] * 2
+            )
+        )
+        self.assertTrue(
+            budget_brake_router.premium_residual_composition_guard(
+                [residual] * 3 + ["word_problem"]
+            )
+        )
+
+    def _batch(self, prompts: list[str]) -> InputBatch:
+        return InputBatch(
+            schema_version=1,
+            challenge_id="toy",
+            split="public",
+            episodes=tuple(
+                Episode(episode_id=f"cond-{index}", prompt=prompt)
+                for index, prompt in enumerate(prompts)
+            ),
+        )
+
+    def test_mixed_batch_stays_on_unguarded_parent(self) -> None:
+        policy = load_bundled_policy()
+        artifact = budget_brake_router.load_bundled_artifact()
+        batch = self._batch(
+            [
+                "zzz qqq",
+                "How many apples are left over?",
+                "How many oranges are left over?",
+                "How many pears are left over?",
+            ]
+        )
+        families = [
+            family_guard_router.prompt_family(episode) for episode in batch.episodes
+        ]
+        self.assertLess(
+            budget_brake_router.residual_fraction(families),
+            budget_brake_router.CONDITIONAL_PREMIUM_RESIDUAL_THRESHOLD,
+        )
+        rows = tuple(
+            budget_brake_router.premium_prediction_row(episode, policy, artifact)
+            for episode in batch.episodes
+        )
+        live = budget_brake_router.make_submission(batch, policy, artifact, "premium")
+        parent, _ratio = _select_premium_configured(
+            batch,
+            rows,
+            float(artifact.value["predicted_caps"]["premium"]),
+            artifact.family_guard.base,
+        )
+        composed = budget_brake_router.promote_premium_brake(
+            parent,
+            [
+                budget_brake_router.predict_quality(episode, artifact)
+                for episode in batch.episodes
+            ],
+            families,
+            [row[1] for row in rows],
+            [budget_brake_router.content_digest(episode) for episode in batch.episodes],
+            artifact.budget_brake,
+        )
+        self.assertEqual(
+            tuple(decision.model_id for decision in live.submission.decisions),
+            composed,
+        )
+
+    def test_residual_majority_uses_parent_guard_and_denylist(self) -> None:
+        policy = load_bundled_policy()
+        artifact = budget_brake_router.load_bundled_artifact()
+        batch = self._batch(
+            [
+                "zzz qqq",
+                "zzz qqq extra",
+                "zzz qqq more",
+                "How many apples are left over?",
+            ]
+        )
+        families = [
+            family_guard_router.prompt_family(episode) for episode in batch.episodes
+        ]
+        self.assertEqual(families.count(family_guard_router.RESIDUAL_FAMILY), 3)
+        self.assertTrue(budget_brake_router.premium_residual_composition_guard(families))
+        rows = tuple(
+            budget_brake_router.premium_prediction_row(episode, policy, artifact)
+            for episode in batch.episodes
+        )
+        live = budget_brake_router.select_premium_with_brake(
+            batch, policy, artifact, rows
+        )
+        unguarded_parent, _ratio = _select_premium_configured(
+            batch,
+            rows,
+            float(artifact.value["predicted_caps"]["premium"]),
+            artifact.family_guard.base,
+        )
+        unguarded = budget_brake_router.promote_premium_brake(
+            unguarded_parent,
+            [
+                budget_brake_router.predict_quality(episode, artifact)
+                for episode in batch.episodes
+            ],
+            families,
+            [row[1] for row in rows],
+            [budget_brake_router.content_digest(episode) for episode in batch.episodes],
+            artifact.budget_brake,
+        )
+        self.assertNotEqual(live, unguarded)
+        for family, model_id in zip(families, live):
+            if family == family_guard_router.RESIDUAL_FAMILY:
+                self.assertNotEqual(model_id, _K1)
+
+
+class ConditionalFastCapTest(unittest.TestCase):
+    def test_threshold_is_three_quarters(self) -> None:
+        self.assertEqual(budget_brake_router.CONDITIONAL_FAST_FAMILY_THRESHOLD, 0.75)
+        self.assertEqual(budget_brake_router.CONDITIONAL_FAST_CAP, 1.07)
+        self.assertFalse(
+            budget_brake_router.fast_family_composition_guard(
+                ["word_problem"] * 2 + ["other"] * 2
+            )
+        )
+        self.assertTrue(
+            budget_brake_router.fast_family_composition_guard(
+                ["word_problem"] * 3 + ["other"]
+            )
+        )
+
+    def test_family_majority_fast_uses_tight_cap(self) -> None:
+        policy = load_bundled_policy()
+        artifact = budget_brake_router.load_bundled_artifact()
+        parent = family_guard_router.load_bundled_artifact()
+        batch = InputBatch(
+            schema_version=1,
+            challenge_id="toy",
+            split="public",
+            episodes=tuple(
+                Episode(
+                    episode_id=f"wp-{index}",
+                    prompt=f"How many apples are left over after {index}?",
+                )
+                for index in range(4)
+            ),
+        )
+        families = [
+            family_guard_router.prompt_family(episode) for episode in batch.episodes
+        ]
+        self.assertTrue(budget_brake_router.fast_family_composition_guard(families))
+        live = budget_brake_router.make_submission(batch, policy, artifact, "fast")
+        guarded = family_guard_router.make_submission(batch, policy, parent, "fast")
+        self.assertAlmostEqual(live.predicted_cap, 1.07)
+        self.assertAlmostEqual(guarded.predicted_cap, 1.11)
+        balanced = budget_brake_router.make_submission(
+            batch, policy, artifact, "balanced"
+        )
+        parent_balanced = family_guard_router.make_submission(
+            batch, policy, parent, "balanced"
+        )
+        self.assertEqual(
+            [d.model_id for d in balanced.submission.decisions],
+            [d.model_id for d in parent_balanced.submission.decisions],
+        )
 
 
 if __name__ == "__main__":

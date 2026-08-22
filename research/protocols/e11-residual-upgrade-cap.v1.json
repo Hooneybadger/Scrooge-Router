@@ -1,0 +1,56 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "residual-upgrade-0.80",
+      "residual-upgrade-0.67",
+      "residual-upgrade-0.50"
+    ],
+    "selection": "Among passers, prefer the earlier candidate (larger upgrade fraction, least cut).",
+    "upgrade_caps": {
+      "residual-upgrade-0.50": 0.5,
+      "residual-upgrade-0.67": 0.67,
+      "residual-upgrade-0.80": 0.8
+    }
+  },
+  "context_frozen": {
+    "note": "After shipped Premium allocation, residual rows may keep at most this fraction off Light. Grid is 4/5, ~2/3, 1/2. Not solved from 4.38."
+  },
+  "decision_reasons": {
+    "fail": "No residual upgrade-fraction cap cleared residual safety and Dev veto. Keep the current runtime.",
+    "pass": "A residual upgrade-fraction cap brought residual-only Premium under the inflated cap without failing Dev veto."
+  },
+  "decisions": {
+    "fail": "record-e11-no-promote-current-runtime",
+    "pass": "record-e11-promotion-window-open"
+  },
+  "experiment": "e11-residual-upgrade-cap-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Residual-only Premium actual and inflated under 4.0. Dev official score is a veto.",
+    "selection": "Larger upgrade fraction among passers."
+  },
+  "output": {
+    "audit_relative": "build/run-e11-residual-upgrade-cap/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e11-residual-upgrade-cap/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e11-residual-upgrade-cap-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002,
+    "residual_premium_actual_max": 4.0,
+    "residual_premium_inflated_max": 4.0
+  }
+}

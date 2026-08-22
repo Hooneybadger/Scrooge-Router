@@ -1,0 +1,379 @@
+{
+  "blocked_seeds": [
+    20260821,
+    20260822,
+    20260823,
+    20260824,
+    20260825,
+    116341498,
+    215679302,
+    253011083,
+    292577053,
+    305408514,
+    400818725,
+    511394098,
+    515672025,
+    534284889,
+    544868342,
+    572878001,
+    578057546,
+    655399222,
+    999558656,
+    1003090710,
+    1043203741,
+    1124696458,
+    1250738729,
+    1303320403,
+    1329561813,
+    1444644023,
+    1452987153,
+    1524653244,
+    1592039285,
+    1763238305,
+    1773845641,
+    1783423358,
+    1797397368,
+    1860797546,
+    1961852001,
+    1980863820,
+    1985170374,
+    1988874908,
+    2049515330,
+    2132086428,
+    2146174231
+  ],
+  "comparator": {
+    "fallback_dev": {
+      "n_k1": 16,
+      "official_final_score": "0.669517045455",
+      "ratios": {
+        "balanced": "1.396000996251",
+        "fast": "1.093011852072",
+        "premium": "2.160755720509"
+      },
+      "tier_quality": {
+        "balanced": "0.674431818182",
+        "fast": "0.643181818182",
+        "premium": "0.699715909091"
+      }
+    },
+    "fallback_note": "Current runtime Dev official pin only. Do not subtract it from grouped OOF scores.",
+    "grouped": "same-seed current budget_brake_router.make_submission on the same public grouped folds. Same official scorer as the candidate. Justified so delta is protocol-aligned and is not an exact-cost OOF subtraction.",
+    "reproduction": {
+      "final_score": "0.691477272727",
+      "note": "Published Train-only V7 fair Dev. Exact Decimal 12-place match required; no hyperparameter search.",
+      "source": "tykimdream experiments/results/aggressive-v7-fair-dev.json routers.v7",
+      "tiers": {
+        "balanced": {
+          "budget_ratio": "1.653162122486",
+          "model_counts": {
+            "ax31": 785,
+            "ax31-light": 93,
+            "axk1-think": 2
+          },
+          "quality_score": "0.689772727273"
+        },
+        "fast": {
+          "budget_ratio": "1.145520783178",
+          "model_counts": {
+            "ax31": 293,
+            "ax31-light": 587,
+            "axk1-think": 0
+          },
+          "quality_score": "0.659943181818"
+        },
+        "premium": {
+          "budget_ratio": "3.006000526541",
+          "model_counts": {
+            "ax31": 665,
+            "ax31-light": 100,
+            "axk1-think": 115
+          },
+          "quality_score": "0.735227272727"
+        }
+      },
+      "tolerance": "exact-decimal-12"
+    }
+  },
+  "decisions": {
+    "grouped_fail": "record-v7-challenger-grouped-fail-current-runtime",
+    "no_valid_reference": "record-v7-challenger-no-valid-reference-current-runtime",
+    "pass": "record-v7-challenger-pass-await-independent-audit",
+    "reproduction_fail": "record-v7-challenger-reproduction-fail-current-runtime"
+  },
+  "epsilon": 0.014204545454545449,
+  "experiment": "v7-challenger-v1",
+  "family_counts": {
+    "center": {
+      "english_multiple_choice": 0.09431818181818181,
+      "korean_multiple_choice": 0.18295454545454545,
+      "korean_reasoning": 0.022727272727272728,
+      "latex_math": 0.05795454545454545,
+      "long_context": 0.09090909090909091,
+      "other": 0.10643939393939394,
+      "python_program": 0.13636363636363635,
+      "rule_reasoning": 0.16022727272727272,
+      "symbolic_math": 0.06780303030303031,
+      "word_problem": 0.0803030303030303
+    },
+    "dev": {
+      "english_multiple_choice": 83,
+      "korean_multiple_choice": 161,
+      "korean_reasoning": 20,
+      "latex_math": 59,
+      "long_context": 80,
+      "other": 90,
+      "python_program": 119,
+      "rule_reasoning": 141,
+      "symbolic_math": 60,
+      "word_problem": 67
+    },
+    "n_dev": 880,
+    "n_pool": 2640,
+    "n_train": 1760,
+    "pool": {
+      "english_multiple_choice": 249,
+      "korean_multiple_choice": 483,
+      "korean_reasoning": 60,
+      "latex_math": 153,
+      "long_context": 240,
+      "other": 281,
+      "python_program": 360,
+      "rule_reasoning": 423,
+      "symbolic_math": 179,
+      "word_problem": 212
+    },
+    "train": {
+      "english_multiple_choice": 166,
+      "korean_multiple_choice": 322,
+      "korean_reasoning": 40,
+      "latex_math": 94,
+      "long_context": 160,
+      "other": 191,
+      "python_program": 241,
+      "rule_reasoning": 282,
+      "symbolic_math": 119,
+      "word_problem": 145
+    }
+  },
+  "fidelity_core_sha256": "1c4b8144378f55779aaf1cf3e78424abd749a93e3d4e33744ccda82304b7cbc9",
+  "fresh_seeds": [
+    1726202894,
+    252428889,
+    1120507837,
+    141957400,
+    1234496749,
+    1353411567,
+    1103101561,
+    2142214382,
+    496053794,
+    58658564,
+    297610007,
+    1888638919
+  ],
+  "methodology": {
+    "allocator": {
+      "bisection_steps": 48,
+      "canonical_content_sort": true,
+      "fast_k1_hard_ban": true,
+      "premium_ax31_fill_safety": 0.65,
+      "restore_input_order": true,
+      "tie_break": "equal utility prefers cheaper MODEL_IDS index"
+    },
+    "ensemble_alphas": {
+      "balanced": [
+        10000.0
+      ],
+      "fast": [
+        300.0,
+        500.0,
+        5000.0
+      ],
+      "premium": [
+        3000.0,
+        10000.0,
+        15000.0
+      ]
+    },
+    "fallback_router": "ossp_router.budget_brake_router.make_submission",
+    "features": {
+      "dense_names": [
+        "log_character_count",
+        "log_word_count",
+        "log_sentence_count",
+        "log_message_count",
+        "hangul_ratio",
+        "log_code_marker_count",
+        "log_math_marker_count",
+        "numeric_density",
+        "long_context",
+        "log_reasoning_marker_count",
+        "formal_reasoning",
+        "program_analysis",
+        "log_multi_constraint_count",
+        "simple_transform",
+        "log_line_count",
+        "ascii_ratio",
+        "log_digit_count",
+        "log_choice_count",
+        "has_question_label",
+        "has_assert_hole",
+        "has_python_function",
+        "has_logic_rules",
+        "has_arithmetic_request",
+        "has_latex",
+        "has_binary_choices",
+        "length_le_60",
+        "length_le_100",
+        "length_101_500",
+        "length_501_2000",
+        "length_over_2000",
+        "length_over_8000",
+        "korean_multiple_choice",
+        "short_code",
+        "short_math_numeric",
+        "multi_message",
+        "quote_density",
+        "newline_density",
+        "ends_with_question",
+        "contains_answer_placeholder",
+        "contains_currency_or_percent"
+      ],
+      "hash_algorithm": "fnv1a64-signed-word-1-3-char-3-4-stride-2",
+      "hash_bins": 512,
+      "normalization": "casefold; decimal tokens and number-runs -> <number>",
+      "window": "char grams use normalized_template; >4000 keeps 3000+last 1000"
+    },
+    "heads": "per-model score Ridge and log-cost Ridge; tier mean ensemble",
+    "no_id_split_order_features": true,
+    "reserve": {
+      "composition_penalty": 1.0,
+      "downward_only": true,
+      "formula": "exp(-1*max|rate-ref| - 0.25*max(0,sqrt(1000/n)-1))",
+      "signal_names": [
+        "korean_hangul_10pct",
+        "code_marker",
+        "math_or_numeric",
+        "long_context_gt_8000",
+        "short_context_le_100",
+        "messages"
+      ],
+      "small_batch_penalty": 0.25,
+      "stable_batch_size": 1000,
+      "train_only_reference_rates": true
+    },
+    "runtime_compile": "average (coef/scale) and intercept after centering",
+    "train_budget_targets": {
+      "balanced": 1.95,
+      "fast": 1.23,
+      "premium": 3.85
+    },
+    "workload_guard": {
+      "max_characters": 30000000,
+      "max_episodes": 6000,
+      "max_messages": 100000,
+      "max_work_units": 40000000
+    }
+  },
+  "n_fresh_seeds": 12,
+  "output": {
+    "audit_relative": "build/v7-challenger/episode-audit.json",
+    "confirm_report_forbidden": "build/confirm-chuf-tvball/report.json",
+    "e1f_report_forbidden": "build/compare-e1f-cost-conditioned-frontier/report.json",
+    "fidelity_report_forbidden": "build/frozen-runtime-fidelity/report.json",
+    "phase2_report_forbidden": "build/phase2-chuf-predicted-cost/report.json",
+    "report_relative": "build/v7-challenger/report.json"
+  },
+  "phase": "A",
+  "pins": {
+    "budget_brake_artifact_sha256": "01226b5678f1f9e50fe1537ffc7f2e82ba88771ddd0693cff5edbba655a3bb6e",
+    "budget_brake_source_sha256": "a4b3583d3e94dd41b4b447a57a0d25b0d35b6319e4a16df1091a2a53f778142c",
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "family_guard_artifact_sha256": "492944065f98786915f2c555f84cf60714bd6580ad75ae0f783158b13c9bf038",
+    "methodology_sha256": "af90b3729aa8d1aa86d3a76869206fe295337ef74f95a2cfd48ffae5b7e4829c",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "source_relative": "research/lab/v7_challenger.py",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "v7-challenger-v1",
+  "reference": {
+    "adaptive_commit": "88641e89f0f373ac30487bbaedd60f9cb5a8d516",
+    "fair_dev_sha256": "07a721a83c3aee15419ad5b3f1467574ab865e0ec39927a26c1433b83a7d0f06",
+    "file_sha256": {
+      "aggressive_v5.py": "4ade9fc11269497aa9454439c8e80a16784be1c8a983cd77470f8aa0eca85d85",
+      "aggressive_v6.py": "094c5bd06fbf9fc19bc75e6950955113037a580bf18ab3accc60ad90c7578e8c",
+      "aggressive_v7.py": "b5e4dc18725371a3ef1c3cbff94bede53366eeb750940f12b93393ebeac1c402",
+      "competition.py": "a8fe3e5c20dfb860e785dc8253f783ccd72b247c4e4aa3482433fbcbfe8db50d",
+      "submission.py": "e1af492f0ce44908ce8c617ee2d0cd737987acc67f83f36d4ff7d07a3ccc307e",
+      "train_aggressive_router_v5.py": "4918605ad449c3483ce1718133d005dc1f7983e0abc5e14b6a0771a9518613b6"
+    },
+    "final_commit": "14f9a5e387b774b85e3d1eb8687a558074d1cecc",
+    "license": "Apache-2.0",
+    "license_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "published_profile_sha256": "172ddac2eda27b58d3ef0c5d684e1183a4e86988cd0fc662ed73c9defe2215f2",
+    "repository": "https://github.com/tykimdream/ossp-2026-llm-router-challenge",
+    "train_reference_rates_published": {
+      "code_marker": 0.26931818181818185,
+      "korean_hangul_10pct": 0.2056818181818182,
+      "long_context_gt_8000": 0.09090909090909091,
+      "math_or_numeric": 0.4909090909090909,
+      "messages": 0.0,
+      "short_context_le_100": 0.17784090909090908
+    },
+    "v61_commit": "d7e15d019f4ce2f5d27e071cd56c6260a486cd7a"
+  },
+  "required_families": [
+    "english_multiple_choice",
+    "korean_multiple_choice",
+    "korean_reasoning",
+    "latex_math",
+    "long_context",
+    "other",
+    "python_program",
+    "rule_reasoning",
+    "symbolic_math",
+    "word_problem"
+  ],
+  "runtime_export": false,
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(FIDELITY_CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; i=0..11. Collision or overlap with old E1F, confirmation-12, phase2-12, or fidelity-12 fails closed.",
+    "core_sha256": "1c4b8144378f55779aaf1cf3e78424abd749a93e3d4e33744ccda82304b7cbc9",
+    "fail_closed_on_collision": true,
+    "n": 12,
+    "prefix": "scrooge-v7-challenger-v1",
+    "skip_digest_on_collision": false
+  },
+  "stress": {
+    "bootstrap_draws": 200,
+    "bootstrap_seed": 557209147,
+    "dirac_family_view": false
+  },
+  "thresholds": {
+    "dirac_family_view": false,
+    "expected_score_formula": "official_quality * (1 - min(1, max_t max(0, (q999_t - official_cap_t)/official_cap_t)))",
+    "grouped_delta_mean": 0.015,
+    "grouped_delta_worst": 0.01,
+    "grouped_mean_score": 0.69,
+    "grouped_worst_score": 0.687,
+    "official_caps": {
+      "balanced": 2.0,
+      "fast": 1.25,
+      "premium": 4.0
+    },
+    "reproduction_min_final": 0.69,
+    "reproduction_tolerance": "exact-decimal-12",
+    "stress_ratio_caps": {
+      "balanced": 1.9,
+      "fast": 1.1875,
+      "premium": 3.8
+    },
+    "tv_worst_min": -0.003
+  },
+  "uses_competitor_artifact_weights": false
+}

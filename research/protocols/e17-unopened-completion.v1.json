@@ -1,0 +1,215 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "e9-keep-e14",
+      "e9-keep-e13-e14",
+      "e9-keep-e13",
+      "e9-keep-e14-0.50",
+      "cond-fast-1.08-0.75",
+      "cond-fast-1.08-0.50",
+      "cond-fast-1.08-0.25",
+      "cond-top2-1.08-0.75",
+      "cond-top2-1.08-0.50",
+      "cond-top2-1.07-0.25",
+      "cond-top3-1.07-0.75",
+      "cond-top3-1.07-0.50",
+      "cond-top3-1.08-0.75",
+      "cond-top3-1.05-0.75",
+      "leftover-e10-0.73",
+      "e9-fast-1.08-word-1.50",
+      "e9-fast-1.08-word-2.00",
+      "unify-e9-fast-1.10"
+    ],
+    "knobs": {
+      "e9-keep-e14": {
+        "e10_threshold": null,
+        "fast_cap": 1.07,
+        "fast_mode": "e14-only",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": true
+      },
+      "e9-keep-e13-e14": {
+        "e10_threshold": null,
+        "fast_cap": 1.07,
+        "fast_mode": "e13-e14",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": true
+      },
+      "e9-keep-e13": {
+        "e10_threshold": null,
+        "fast_cap": 1.07,
+        "fast_mode": "e13-only",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": true
+      },
+      "e9-keep-e14-0.50": {
+        "e10_threshold": null,
+        "fast_cap": 1.07,
+        "fast_mode": "e14-only",
+        "leftover_fast_mult": null,
+        "threshold": 0.5,
+        "unify_premium": true
+      },
+      "cond-fast-1.08-0.75": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "e13",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": false
+      },
+      "cond-fast-1.08-0.50": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "e13",
+        "leftover_fast_mult": null,
+        "threshold": 0.5,
+        "unify_premium": false
+      },
+      "cond-fast-1.08-0.25": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "e13",
+        "leftover_fast_mult": null,
+        "threshold": 0.25,
+        "unify_premium": false
+      },
+      "cond-top2-1.08-0.75": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "e14",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": false
+      },
+      "cond-top2-1.08-0.50": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "e14",
+        "leftover_fast_mult": null,
+        "threshold": 0.5,
+        "unify_premium": false
+      },
+      "cond-top2-1.07-0.25": {
+        "e10_threshold": null,
+        "fast_cap": 1.07,
+        "fast_mode": "e14",
+        "leftover_fast_mult": null,
+        "threshold": 0.25,
+        "unify_premium": false
+      },
+      "cond-top3-1.07-0.75": {
+        "e10_threshold": null,
+        "fast_cap": 1.07,
+        "fast_mode": "top3",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": false
+      },
+      "cond-top3-1.07-0.50": {
+        "e10_threshold": null,
+        "fast_cap": 1.07,
+        "fast_mode": "top3",
+        "leftover_fast_mult": null,
+        "threshold": 0.5,
+        "unify_premium": false
+      },
+      "cond-top3-1.08-0.75": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "top3",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": false
+      },
+      "cond-top3-1.05-0.75": {
+        "e10_threshold": null,
+        "fast_cap": 1.05,
+        "fast_mode": "top3",
+        "leftover_fast_mult": null,
+        "threshold": 0.75,
+        "unify_premium": false
+      },
+      "leftover-e10-0.73": {
+        "e10_threshold": 0.73,
+        "fast_cap": null,
+        "fast_mode": "shipped",
+        "leftover_fast_mult": null,
+        "threshold": null,
+        "unify_premium": false
+      },
+      "e9-fast-1.08-word-1.50": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "global",
+        "leftover_fast_mult": 1.5,
+        "threshold": null,
+        "unify_premium": true
+      },
+      "e9-fast-1.08-word-2.00": {
+        "e10_threshold": null,
+        "fast_cap": 1.08,
+        "fast_mode": "global",
+        "leftover_fast_mult": 2.0,
+        "threshold": null,
+        "unify_premium": true
+      },
+      "unify-e9-fast-1.10": {
+        "e10_threshold": null,
+        "fast_cap": 1.1,
+        "fast_mode": "global",
+        "leftover_fast_mult": null,
+        "threshold": null,
+        "unify_premium": true
+      }
+    },
+    "leftover_fast_families": [
+      "english_multiple_choice",
+      "word_problem"
+    ],
+    "selection": "Among passers, prefer the earlier candidate: E9 plus Fast switches first, then skipped 1.08 conditions, then top-3, then leftover stacks."
+  },
+  "context_frozen": {
+    "note": "Public official top-3 family mass is about 0.48, so 0.50 does not bind the official mix. 1.08 is the original select_family_guard Fast grid point skipped by E13/E14. 0.73 is the leftover E10 underbind below the 0.744 digest-head mix. Triple views are every eligible family triple with n>=20 each, digest-balanced. Triple ruin binds only top-3 arms. Pair views bind every arm.",
+    "prior": "E15 closed always-on replacement. E16 closed leftover 2.62/clip/word/E11/E10-0.50. This protocol opens the named arms those protocols refused or never stacked."
+  },
+  "decision_reasons": {
+    "fail": "No previously unopened arm cleared official safety, Fast composition and pair views, residual Premium inflation, top-3 views where they bind, or Dev veto. Keep the current runtime.",
+    "pass": "A previously unopened arm cleared official safety, Fast composition and pair views, and residual Premium inflation inside Dev veto."
+  },
+  "decisions": {
+    "fail": "record-e17-no-promote-current-runtime",
+    "pass": "record-e17-unopened-window-open"
+  },
+  "experiment": "e17-unopened-completion-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Official mix need not stay bit-identical. Official spend must stay under the official caps and below the 95 percent near line. Every Fast composition and pair view actual and inflated must stay under 1.25. Residual-only Premium actual and inflated must stay under 4.0. Top-3 arms also need every triple view under 1.25 including inflation. Dev veto is -0.002 versus the shipped E10+E13 pin.",
+    "selection": "Earlier candidate first."
+  },
+  "output": {
+    "audit_relative": "build/run-e17-unopened-completion/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e17-unopened-completion/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e17-unopened-completion-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002
+  }
+}

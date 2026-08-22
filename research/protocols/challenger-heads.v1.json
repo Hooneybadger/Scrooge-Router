@@ -1,0 +1,114 @@
+{
+  "arms": {
+    "baseline": {
+      "definition": "Incumbent quality-head recipe refit per fold on outer-train: unweighted closed-form ridge alpha=100 (intercept column unpenalized) on standardized 14-d structural features, direct target scores[:,1]-scores[:,0]. Mirrors the shipped cost-calibrated-router.v1 quality head.",
+      "name": "incumbent-ridge-refit"
+    },
+    "challenger_gbm": {
+      "definition": "HistGradientBoostingRegressor(max_iter=200, learning_rate=0.1, min_samples_leaf=20, l2_regularization=1.0, early_stopping=False, random_state=20260816) on the same 14-d structural features, direct delta-31 target. Represents the boosted-tree uplift class (GBM team / hwkim3330 cost-side class).",
+      "name": "gbm-histgb-uplift"
+    },
+    "challenger_routerx": {
+      "definition": "TfidfVectorizer(word ngram(1,2), max_features=60000) hstacked with TfidfVectorizer(char_wb ngram(3,5), max_features=120000), fitted on outer-train texts only, then Ridge(alpha=1.0) on the sparse design, direct delta-31 target. Represents RouterX's high-dimensional lexical uplift head.",
+      "name": "routerx-tfidf-uplift"
+    },
+    "challenger_shin": {
+      "definition": "IRT-lite: theta(x) = ridge alpha=100 prediction of s_light from [standardized 14-d structural; signed L2-normalized hashed uni+bigram into 512 bins]; per-model LogisticRegression(C=10) calibrates each model's score band (score >= outer-train median of that model's score) against theta; arm uplift = p_ax31 - p_light. Declared approximation of Shin LPB's shared-ability 2PL form whose exact calibration is unpublished.",
+      "name": "shin-irt-ability"
+    }
+  },
+  "context_frozen": {
+    "allocator": "feasibility_ladder.select_fast_balanced with the bundled family-guard artifact caps, runaway_fraction and max_upgrade_fraction; guarded_prediction repricing applied to costs only.",
+    "note": "Costs, caps, guard multipliers and every allocator constant stay shipped/frozen. Only the uplift vector feeding fast/balanced selection varies between arms.",
+    "premium_scope": "Premium decisions are identical across arms and cancel in paired deltas; competitor honest gaps concentrate in Light-to-AX31 ranking where weight 0.7 lives."
+  },
+  "decision_reasons": {
+    "fail": "No challenger head cleared the pre-registered gates on fresh seeds. The incumbent recipe stays champion and our position is confirmed by paired evidence.",
+    "pass": "A challenger head beat the incumbent recipe through the actual serving path on fresh seeds. This opens a promotion window only; integration requires a separate sealed protocol."
+  },
+  "decisions": {
+    "fail": "record-challenger-heads-no-promote-current-runtime",
+    "pass": "record-challenger-heads-promotion-window-open"
+  },
+  "epsilon": 0.014204545454545449,
+  "experiment": "challenger-heads-v1",
+  "fresh_seeds": [
+    130672035,
+    733125616,
+    733043265,
+    1283801968,
+    498402659
+  ],
+  "metric": {
+    "delta_definition": "Paired official weighted score difference (arm minus baseline): 0.4*deltaQ_fast + 0.3*deltaQ_balanced pooled per seed over held-out folds; premium contributes zero.",
+    "family_decomposition": "delta_f = 0.4*(n_f/N)*meanDiffFast_f + 0.3*(n_f/N)*meanDiffBalanced_f so that family deltas sum to the pooled delta.",
+    "protocol_note": "Runtime-in-the-loop: identical to e5-brake-conditioned-v1 but injected at the fast/balanced ladder selection instead of the premium brake."
+  },
+  "multi_arm_rule": "If several arms clear every gate, the window opens for the arm with the highest mean delta; ties resolve toward the simpler model (baseline < histgb < tfidf < irt).",
+  "output": {
+    "audit_relative": "build/run-challenger-heads/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-challenger-heads/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "challenger-heads-v1",
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; collision fails closed.",
+    "core_sha256": "d44a7401f24105ff3c409b45ad76b43981c448507fc58e2daf1cb615c0ddd48b",
+    "forbidden_previous_seeds": [
+      20260821,
+      20260822,
+      20260823,
+      20260824,
+      20260825,
+      1524653244,
+      655399222,
+      544868342,
+      1444644023,
+      2132086428,
+      292577053,
+      1003090710,
+      253011083,
+      534284889,
+      2049515330,
+      515672025,
+      572878001,
+      763133369,
+      68726617,
+      1988695219,
+      929558432,
+      1924177588,
+      1558982291,
+      995925147,
+      1201315901,
+      850766810,
+      462283710
+    ],
+    "n": 5,
+    "prefix": "scrooge-challenger-heads-v1",
+    "skip_digest_on_collision": false
+  },
+  "thresholds": {
+    "budget_limits": {
+      "balanced_actual_ratio_max": 1.9,
+      "fast_actual_ratio_max": 1.1875
+    },
+    "mean_delta_min": 0.002,
+    "tvball_worst_min": -0.003,
+    "view_min_n": 20,
+    "worst_seed_delta_min_exclusive": 0.0
+  },
+  "tv_ball": {
+    "formula": "tv_worst = pooled_delta + epsilon * (min_family_delta - max_family_delta)",
+    "n_ge": 20
+  }
+}

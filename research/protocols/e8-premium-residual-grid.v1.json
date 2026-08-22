@@ -1,0 +1,69 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "residual-parent-2.75",
+      "residual-parent-3.00"
+    ],
+    "definitions": {
+      "residual-parent-2.75": "Premium parent residual AX31 increment x2.75. Midpoint of the remaining family-guard clip after shipped 2.5. Brake unguarded. Fast/Balanced shipped.",
+      "residual-parent-3.00": "Premium parent residual AX31 increment x3.0. Family-guard clip high. Brake unguarded. Fast/Balanced shipped.",
+      "shipped": "Fast 1.11, Balanced 1.45, Premium predicted cap 3.25, brake_ratio 3.25. Premium parent is unguarded."
+    },
+    "multipliers": {
+      "residual-parent-2.75": 2.75,
+      "residual-parent-3.00": 3.0
+    },
+    "selection": "Among arms that clear every gate, the smaller residual multiplier wins. Train official score is a tie-break only."
+  },
+  "context_frozen": {
+    "artifact": "src/ossp_router/resources/budget-brake-router.v1.json",
+    "brake": "promote_premium_brake on unguarded predicted costs; brake_ratio 3.25; count_cap 48; runaway_absolute shipped.",
+    "clip": "family_guard_router.MULTIPLIER_CLIP = (1.0, 3.0). Grid stays inside the clip. Fast/Balanced keep shipped 2.5.",
+    "note": "Cost heads, Fast/Balanced family guard, runaway_fraction, ExtraTrees and denylist stay shipped. Do not add a continuous multiplier fitted to the E7 leftover 4.034.",
+    "parent_allocator": "feasibility_ladder._select_premium_configured with k1_enabled=false on guarded parent rows, then budget_brake_router.promote_premium_brake on unguarded rows",
+    "prior": "E7 residual-parent 2.5 is sealed no-promote. This protocol is the remaining clip grid, not a retune of 2.5 from 4.38 or 4.034."
+  },
+  "decision_reasons": {
+    "fail": "Neither clip-grid Premium residual multiplier cleared the pre-registered residual-cap, official-safety, Fast/Balanced identity, or Dev veto gates. Keep the current runtime. Do not add a post-hoc multiplier outside this grid.",
+    "pass": "A clip-grid Premium residual multiplier kept Fast/Balanced identical, held official Train/Dev off the near-budget line, and brought residual-only Premium under the official cap including inflation. This opens a promotion window only."
+  },
+  "decisions": {
+    "fail": "record-e8-no-promote-current-runtime",
+    "pass": "record-e8-promotion-window-open"
+  },
+  "experiment": "e8-premium-residual-grid-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Official weighted final score on the full Train and Dev batches. Residual-only and other composition views replay the allocator. Fast/Balanced identity is bit-exact versus shipped.",
+    "selection": "Smaller residual multiplier among arms that pass every safety gate. Dev official score is a veto, not a ranking objective."
+  },
+  "motivation": {
+    "e7": "Shipped 2.5 on Premium parent: Dev family:other actual 3.828 / inflated 4.034. Official mixed-batch score unchanged.",
+    "grid": "2.75 is the midpoint of the remaining clip interval (2.5, 3.0]. 3.0 is the existing family-guard clip high. Neither value is solved from 4.034.",
+    "note": "Family-specific Fast patches remain forbidden. Do not raise the clip."
+  },
+  "output": {
+    "audit_relative": "build/run-e8-premium-residual-grid/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e8-premium-residual-grid/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e8-premium-residual-grid-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002,
+    "residual_premium_actual_max": 4.0,
+    "residual_premium_inflated_max": 4.0
+  }
+}

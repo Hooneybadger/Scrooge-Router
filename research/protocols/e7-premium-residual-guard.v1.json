@@ -1,0 +1,58 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidate": "premium-residual-guard",
+    "definitions": {
+      "premium-residual-guard": "Shipped Fast/Balanced. Premium parent reprices residual AX31 increment with the shipped family-guard multiplier (other=2.5). Brake spend and K1 increment stay on unguarded predicted costs. No new constant.",
+      "shipped": "Fast 1.11, Balanced 1.45, Premium predicted cap 3.25, brake_ratio 3.25. Premium parent is unguarded."
+    }
+  },
+  "context_frozen": {
+    "artifact": "src/ossp_router/resources/budget-brake-router.v1.json",
+    "brake": "promote_premium_brake on unguarded predicted costs; brake_ratio 3.25; count_cap 48; runaway_absolute shipped.",
+    "multiplier": "family_guard_router.guard_multiplier; residual family other = 2.5. Do not retune from the 4.38 observation in this protocol.",
+    "note": "Cost heads, Fast/Balanced family guard, runaway_fraction, ExtraTrees and denylist stay shipped. Fast/Balanced must remain bit-identical to shipped.",
+    "parent_allocator": "feasibility_ladder._select_premium_configured with k1_enabled=false on guarded parent rows, then budget_brake_router.promote_premium_brake on unguarded rows"
+  },
+  "decision_reasons": {
+    "fail": "The shipped residual multiplier on Premium parent did not clear the pre-registered residual-cap, official-safety, Fast/Balanced identity, or Dev veto gates. Keep the current runtime. Do not raise 2.5 from the 4.38 number in this protocol.",
+    "pass": "Guarding residual AX31 increments on the Premium parent kept Fast/Balanced identical, held official Train/Dev off the near-budget line, and brought residual-only Premium under the official cap including inflation. This opens a promotion window only."
+  },
+  "decisions": {
+    "fail": "record-e7-no-promote-current-runtime",
+    "pass": "record-e7-promotion-window-open"
+  },
+  "experiment": "e7-premium-residual-guard-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Official weighted final score on the full Train and Dev batches. Residual-only and other composition views replay the allocator. Fast/Balanced identity is bit-exact versus shipped.",
+    "selection": "Safety patch: residual Premium actual must drop versus shipped. Dev official score is a veto, not a ranking objective."
+  },
+  "motivation": {
+    "audit_binding_failure": "Train family:other Premium actual 4.3824 / inflated 4.619. Premium parent has no residual accounting.",
+    "note": "Quality-head search and E6 leftover-budget are closed. This protocol tests one already-shipped constant on the missing Premium parent path. Family-specific Fast patches are forbidden."
+  },
+  "output": {
+    "audit_relative": "build/run-e7-premium-residual-guard/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e7-premium-residual-guard/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e7-premium-residual-guard-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002,
+    "residual_premium_actual_max": 4.0,
+    "residual_premium_inflated_max": 4.0
+  }
+}

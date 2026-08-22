@@ -1,0 +1,184 @@
+{
+  "architecture": {
+    "ax31_policy": "e1_baseline_continuous_uplift_oof",
+    "baseline_name": "baseline_continuous_uplift",
+    "beta_prior_a": 0.5,
+    "beta_prior_b": 0.5,
+    "candidate_name": "chuf-v1",
+    "champion_absolute": 0.69,
+    "cost_eps": 1e-15,
+    "cost_feature_definition": "r=log1p(max(cK_point-cA_point,0)/max(cL_point,1e-15)); outer-train uses E2 oof_cost_surfaces inner_train point costs; held-out uses the outer OOF point surface. Item-sigma / q90 / two-price / E2 allocator are not used.",
+    "digitize_right": true,
+    "expected_baseline_20260821": 0.6877178030302,
+    "family_definition": "ossp_router.cost_calibrated_router.prompt_family",
+    "gate_mean_delta": 0.002,
+    "gate_view_drop": 0.003,
+    "gate_worst_delta": 0.001,
+    "k1_policy": "cost_conditioned_hierarchical_isotonic_frontier",
+    "min_cell_groups": 20,
+    "n_cost_bins": 4,
+    "posterior_formula": {
+      "ax31": "pred_qa is byte-identical E1 baseline_continuous_uplift OOF",
+      "bin_edges": "global outer-train quantiles of r at 0.25/0.50/0.75; np.digitize(..., right=True). Duplicate edges stay deterministic. No per-family quantiles.",
+      "c_cell": "median(total_trials_cell) over nonempty family×bin cells; total_trials_cell is n_A if n_A>0 else n_K. Empty median -> 1",
+      "c_family": "median(total_trials_f) over families with n_A>0 or n_K>0; total_trials_f is n_A if n_A>0 else n_K. Empty median -> 1",
+      "cell": "p_m,f,b=(k_m,f,b + C_cell*p_m,f)/(n_m,f,b + C_cell)",
+      "cell_fallback": "unique groups < MIN_CELL_GROUPS or n_A=n_K=0 -> family p_m,f; PAV weight 0 on fallback cells",
+      "family": "p_m,f=(k_m,f + C_family*p_m,global)/(n_m,f + C_family)",
+      "global": "p_m=(sum k_m + 0.5)/(sum n_m + 1) for AX31 and K1",
+      "isotonic": "weighted PAV nondecreasing on u_f,b=pK-pA; weights=unique groups; all-zero weights -> family constant",
+      "pred_qk": "max(isotonic_u_family_bin, 0); unseen family -> max(uk_global,0)",
+      "r": "log1p(max(cK_point-cA_point,0)/max(cL_point,1e-15))",
+      "unseen_family": "global p / uk_global"
+    },
+    "quantile_points": [
+      0.25,
+      0.5,
+      0.75
+    ],
+    "view_min_n": 20
+  },
+  "candidate": "chuf-v1",
+  "decisions": {
+    "fail": "record-chuf-tvball-confirmation-fail-current-runtime",
+    "pass": "record-chuf-tvball-confirmation-pass-await-risk-phase"
+  },
+  "diagnostic_old_seeds": [
+    20260821,
+    20260822,
+    20260823,
+    20260824,
+    20260825
+  ],
+  "e1f": {
+    "audit_sha256": "63fa06c07db908448b2cfe4a6c24ccebbcc8ed2d82dd388d4b0444c6f2cbf0db",
+    "decision": "record-e1f-no-promote",
+    "decision_core_sha256": "f4cca0d425b47bda6e42be9b5c11b64e3cf9c57efd2810f11b22b1bd6051ba79",
+    "source_relative": "research/lab/e1f_cost_conditioned_frontier.py"
+  },
+  "e1f_source_sha256": "bbbb7f94521ad071b6378618e969ce490700c4981efaff9bded72d8d205b6e6d",
+  "epsilon": 0.014204545454545449,
+  "epsilon_formula": "0.5 * sum_f abs(p_train_f - p_dev_f)",
+  "experiment": "chuf-tvball-confirmation-v1",
+  "family_counts": {
+    "center": {
+      "english_multiple_choice": 0.09431818181818181,
+      "korean_multiple_choice": 0.18295454545454545,
+      "korean_reasoning": 0.022727272727272728,
+      "latex_math": 0.05795454545454545,
+      "long_context": 0.09090909090909091,
+      "other": 0.10643939393939394,
+      "python_program": 0.13636363636363635,
+      "rule_reasoning": 0.16022727272727272,
+      "symbolic_math": 0.06780303030303031,
+      "word_problem": 0.0803030303030303
+    },
+    "dev": {
+      "english_multiple_choice": 83,
+      "korean_multiple_choice": 161,
+      "korean_reasoning": 20,
+      "latex_math": 59,
+      "long_context": 80,
+      "other": 90,
+      "python_program": 119,
+      "rule_reasoning": 141,
+      "symbolic_math": 60,
+      "word_problem": 67
+    },
+    "n_dev": 880,
+    "n_pool": 2640,
+    "n_train": 1760,
+    "pool": {
+      "english_multiple_choice": 249,
+      "korean_multiple_choice": 483,
+      "korean_reasoning": 60,
+      "latex_math": 153,
+      "long_context": 240,
+      "other": 281,
+      "python_program": 360,
+      "rule_reasoning": 423,
+      "symbolic_math": 179,
+      "word_problem": 212
+    },
+    "train": {
+      "english_multiple_choice": 166,
+      "korean_multiple_choice": 322,
+      "korean_reasoning": 40,
+      "latex_math": 94,
+      "long_context": 160,
+      "other": 191,
+      "python_program": 241,
+      "rule_reasoning": 282,
+      "symbolic_math": 119,
+      "word_problem": 145
+    }
+  },
+  "family_definition": "ossp_router.cost_calibrated_router.prompt_family",
+  "fresh_seeds": [
+    1524653244,
+    655399222,
+    544868342,
+    1444644023,
+    2132086428,
+    292577053,
+    1003090710,
+    253011083,
+    534284889,
+    2049515330,
+    515672025,
+    572878001
+  ],
+  "n_fresh_seeds": 12,
+  "output": {
+    "audit_relative": "build/confirm-chuf-tvball/episode-audit.json",
+    "e1f_report_forbidden": "build/compare-e1f-cost-conditioned-frontier/report.json",
+    "report_relative": "build/confirm-chuf-tvball/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "chuf-tvball-confirmation-v1",
+  "required_families": [
+    "english_multiple_choice",
+    "korean_multiple_choice",
+    "korean_reasoning",
+    "latex_math",
+    "long_context",
+    "other",
+    "python_program",
+    "rule_reasoning",
+    "symbolic_math",
+    "word_problem"
+  ],
+  "retroactive_promote": false,
+  "runtime_export": false,
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(E1F_CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; i=0..11. Collision or old-seed overlap fails closed and must not skip to the next digest.",
+    "core_sha256": "f4cca0d425b47bda6e42be9b5c11b64e3cf9c57efd2810f11b22b1bd6051ba79",
+    "fail_closed_on_collision": true,
+    "n": 12,
+    "prefix": "scrooge-chuf-tvball-confirmation-v1",
+    "skip_digest_on_collision": false
+  },
+  "thresholds": {
+    "mean_absolute": 0.69,
+    "mean_delta": 0.002,
+    "tv_worst_min": -0.003,
+    "view_min_n": 20,
+    "worst_delta": 0.001
+  },
+  "tv_ball": {
+    "center": "pooled_family_proportion",
+    "epsilon_source": "materialized_inputs_family_counts_only",
+    "formula": "tv_worst = official_delta + epsilon * (min_family_delta - max_family_delta)",
+    "n_ge": 20
+  }
+}

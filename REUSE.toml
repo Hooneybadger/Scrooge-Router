@@ -39,6 +39,7 @@ SPDX-License-Identifier = "Apache-2.0"
 [[annotations]]
 path = [
   "research/artifacts/*.json",
+  "research/protocols/*.json",
   "src/ossp_router/resources/budget-brake-router.v1.json",
   "src/ossp_router/resources/cost-calibrated-router.v1.json",
   "src/ossp_router/resources/family-guard-router.v1.json",

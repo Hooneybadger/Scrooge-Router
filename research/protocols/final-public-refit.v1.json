@@ -1,0 +1,59 @@
+{
+  "accepted_artifact_action": {
+    "on_all_gates_passed": "Report recommends the swap; src/ossp_router/resources/budget-brake-router.v1.json is replaced only after an explicit human approval step recorded in docs.",
+    "on_any_gate_failed": "Keep the current bundled artifact untouched."
+  },
+  "context_frozen": {
+    "unchanged_heads": [
+      "cost_calibrated_router quality/cost coefficients",
+      "premium_overlay ood/kappa/residual_upper/token_upper_bounds",
+      "feasibility_ladder recalibration edges/factors and predicted_caps",
+      "family_guard multipliers",
+      "budget_brake brake_ratio/count_cap/denylist/runaway/train_full_pred_light"
+    ],
+    "why_forest_only": "Cost heads determine premium rows and parent allocation; leaving them frozen guarantees Fast/Balanced stay bit-identical and inherits every budget safety constant. Only the Premium K1 promotion order can change.",
+    "xtrees_recipe": "Identical to research/export/brake_artifact.py: n_estimators=200, max_depth=4, min_samples_leaf=20, max_features=1.0, criterion='squared_error', bootstrap=False, n_jobs=1, random_state=20260816; target=scores[:,2]-scores[:,1]; sample_weight=min(generations[:,1],generations[:,2]); features=ossp_router.cost_calibrated_router.structural_features/14; clip [-1,1]."
+  },
+  "decision_reasons": {
+    "fail": "A safety or contract gate failed on the full-public refit. Keep the current Train-fitted artifact.",
+    "pass": "All acceptance gates passed. The candidate artifact is recommended for the bundled resource pending human approval; this is a final fit, not a model-selection result."
+  },
+  "decisions": {
+    "fail": "record-final-refit-reject-keep-current-artifact",
+    "pass": "record-final-refit-pass-await-swap-approval"
+  },
+  "experiment": "final-public-refit-v1",
+  "gates": {
+    "fast_balanced_identity": "Fast and Balanced decisions from the candidate artifact must equal the bundled artifact byte-for-byte on Train and Dev replays.",
+    "g1_contract_load": "budget_brake_router.load_artifact_mapping accepts the candidate without error.",
+    "g2_determinism": "Two independent Dev replays of the candidate produce identical model tuples.",
+    "g3_predicted_brake": "Predicted Premium ratio <= 3.25 on every evaluated batch (inherited by construction; asserted).",
+    "g4_actual_budget": "Actual Premium ratio < 3.80 on Train replay, Dev replay, and all ten pooled single-family batches.",
+    "g5_dev_floor": "Candidate Dev replay final score >= 0.669517045455 (in-sample floor; falling below the current pin indicates a harness or fit fault, and the candidate is rejected).",
+    "note": "No score-based candidate selection happens here: the recipe is frozen and only grows its training set from 1,760 to 2,640 episodes."
+  },
+  "mandate": {
+    "organizer_rules": "docs/CHALLENGE_RULES.md lines 14-15 and 107-121: public Train/Dev prompts and outcomes may be used for training and optimization; fitted classifiers, coefficients and lookup structures may ship in the image. Final evaluation must use the same router program and learning files validated on public Train/Dev.",
+    "plan_reference": "docs/competitor-strategy-report-2026-08-21.md sections 5 and 9.7 scheduled 'config freeze, full-public refit' for the final artifact.",
+    "scope_guard": "Every honest-score leader ships heads fitted on the full public pool; Scrooge is the only team shipping Train-only heads."
+  },
+  "output": {
+    "audit_relative": "build/run-final-public-refit/episode-audit.json",
+    "candidate_artifact_relative": "build/run-final-public-refit/budget-brake-router.full-public.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-final-public-refit/report.json",
+    "runtime_resource_touched": false
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "final-public-refit-v1",
+  "schema_version": 1,
+  "seed_note": "No folds and no seeds: this is a deterministic single refit plus deterministic replay checks."
+}

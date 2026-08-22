@@ -1,0 +1,90 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "unify-e9",
+      "unify-e9-fast-1.09",
+      "unify-e9-fast-1.08",
+      "unify-e9-fast-1.07",
+      "unify-e9-fast-1.05",
+      "unify-train-ratios"
+    ],
+    "knobs": {
+      "unify-e9": {
+        "extra_train_ratios": false,
+        "fast_cap": 1.11,
+        "unify_premium": true
+      },
+      "unify-e9-fast-1.05": {
+        "extra_train_ratios": false,
+        "fast_cap": 1.05,
+        "unify_premium": true
+      },
+      "unify-e9-fast-1.07": {
+        "extra_train_ratios": false,
+        "fast_cap": 1.07,
+        "unify_premium": true
+      },
+      "unify-e9-fast-1.08": {
+        "extra_train_ratios": false,
+        "fast_cap": 1.08,
+        "unify_premium": true
+      },
+      "unify-e9-fast-1.09": {
+        "extra_train_ratios": false,
+        "fast_cap": 1.09,
+        "unify_premium": true
+      },
+      "unify-train-ratios": {
+        "extra_train_ratios": true,
+        "fast_cap": 1.11,
+        "unify_premium": true
+      }
+    },
+    "selection": "Among passers, prefer the earlier candidate: larger Fast cap first. The Train-ratio extras arm is last because it is a second mechanism, not a cap tighten.",
+    "train_ratio_extras": {
+      "latex_math": 1.259992842406048,
+      "long_context": 1.1619401355072674,
+      "symbolic_math": 1.2147313924066971
+    }
+  },
+  "context_frozen": {
+    "note": "No batch-histogram switch. Premium always uses residual parent 2.5 plus residual K1 denylist. Fast uses one predicted cap on every batch. 1.08 is on the original select_family_guard Fast grid; E12 skipped it by stepping 0.02. Train-ratio extras are the sealed artifact families above 1.0 except residual, which already has 2.5. word_problem 1.009 and english_multiple_choice 1.0 are not extras. Pair views are every eligible family pair with n>=20 each, digest-balanced.",
+    "prior": "E10 and E13 read the batch histogram. This protocol asks whether one always-on family price plus one Fast cap can replace both."
+  },
+  "decision_reasons": {
+    "fail": "No always-on unified guard cleared official safety, Fast composition and pair views, residual Premium inflation, or Dev veto. Keep the current runtime.",
+    "pass": "An always-on family price plus one Fast cap kept official spend safe, put Fast composition and pair views under 1.25 including inflation, and put residual-only Premium under 4.0 including inflation."
+  },
+  "decisions": {
+    "fail": "record-e15-no-promote-current-runtime",
+    "pass": "record-e15-promotion-window-open"
+  },
+  "experiment": "e15-unified-guard-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Official mix need not stay bit-identical. Official spend must stay under the official caps and below the 95 percent near line. Every Fast composition and pair view actual and inflated must stay under 1.25. Residual-only Premium actual and inflated must stay under 4.0. Dev veto is -0.002 versus the shipped E10+E13 pin.",
+    "selection": "Larger Fast cap first. Train-ratio extras last."
+  },
+  "output": {
+    "audit_relative": "build/run-e15-unified-guard/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e15-unified-guard/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e15-unified-guard-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "cond-residual-fast",
+      "cond-residual-both",
+      "static-fast-1.13",
+      "premium-brake-3.40",
+      "premium-brake-3.55"
+    ],
+    "definitions": {
+      "cond-residual-both": "Fast and Balanced caps from the residual-fraction rule; Premium brake stays 3.25.",
+      "cond-residual-fast": "Fast cap from the residual-fraction rule; Balanced 1.45; Premium brake 3.25.",
+      "premium-brake-3.40": "Shipped Fast/Balanced caps; brake_ratio=3.40.",
+      "premium-brake-3.55": "Shipped Fast/Balanced caps; brake_ratio=3.55.",
+      "shipped": "Fast 1.11, Balanced 1.45, Premium predicted cap 3.25, brake_ratio 3.25.",
+      "static-fast-1.13": "Fast 1.13 on every batch; Balanced 1.45; brake 3.25. Control for whether the residual condition is necessary."
+    }
+  },
+  "context_frozen": {
+    "artifact": "src/ossp_router/resources/budget-brake-router.v1.json",
+    "note": "Cost heads, family-guard multipliers, runaway_fraction, count_cap, denylist and ExtraTrees stay shipped. Changing Fast cap does not re-derive runaway; serving uses the frozen 0.165.",
+    "parent_allocator": "feasibility_ladder._select_premium_configured with k1_enabled=false, then budget_brake_router.promote_premium_brake"
+  },
+  "decision_reasons": {
+    "fail": "No leftover-budget arm cleared the pre-registered Train gain, Dev veto, TV-ball and safety gates. Keep the current runtime.",
+    "pass": "A leftover-budget arm beat shipped Train official score through the serving path and survived Dev veto plus composition stress. This opens a promotion window only."
+  },
+  "decisions": {
+    "fail": "record-e6-no-promote-current-runtime",
+    "pass": "record-e6-promotion-window-open"
+  },
+  "epsilon": 0.014204545454545449,
+  "experiment": "e6-leftover-budget-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Official weighted final score on the full Train batch (selection) and full Dev batch (veto). Stress views replay the allocator.",
+    "selection": "Train official Δ versus shipped; Dev never ranks arms."
+  },
+  "motivation": {
+    "note": "Quality-head search is exhausted. lock_final_policy already searched static Fast/Balanced grids with a numpy replica. E6 tests two untested leftover levers on the actual serving path: a content-only residual-fraction cap rule, and a modest Premium brake raise.",
+    "original_e5_unrun": "Competitor-report E5 (Fast-first cap recovery) was never run after the later E1 chain. This protocol is that leftover question plus a composition condition so hidden residual mix can keep the shipped Fast cap."
+  },
+  "output": {
+    "audit_relative": "build/run-e6-leftover-budget/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e6-leftover-budget/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e6-leftover-budget-v1",
+  "residual_rule": {
+    "balanced_caps": {
+      "high": 1.45,
+      "low": 1.52,
+      "mid": 1.48
+    },
+    "fast_caps": {
+      "high": 1.11,
+      "low": 1.13,
+      "mid": 1.12
+    },
+    "family": "other",
+    "thresholds": {
+      "low_max": 0.05,
+      "mid_max": 0.10
+    }
+  },
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.0005,
+    "train_delta_min": 0.002,
+    "tvball_worst_min": -0.003
+  }
+}

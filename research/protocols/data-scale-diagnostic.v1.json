@@ -1,0 +1,92 @@
+{
+  "arms": {
+    "baseline_train_only": {
+      "definition": "Per-fold ExtraTrees refit on outer-train restricted to Train-split episodes only (mirrors the shipped 1,760-fitted head; fold-local size ~1,408).",
+      "name": "fit-train-split-only"
+    },
+    "treatment_full_public": {
+      "definition": "Per-fold ExtraTrees refit on the full outer-train including Dev-split episodes (mirrors the full-public final fit; fold-local size ~2,112). Same recipe, same allocator, same uplift rank key.",
+      "name": "fit-outer-full"
+    }
+  },
+  "context_frozen": {
+    "note": "Parent allocation, premium rows, families, digests and every brake constant come from the bundled artifact only. Both arms share the parent per fold.",
+    "rank_key": "predicted delta-K descending (uplift), identical to the shipped runtime"
+  },
+  "decision_reasons": {
+    "fail": "Including Dev-split episodes in the brake-head training set does not clear the pre-registered diagnostic bar on fresh seeds. The full-public refit candidate stays recommended-off.",
+    "pass": "Training the same frozen recipe on more public episodes beats the Train-only fit on held-out folds on fresh seeds. This supports swapping the bundled brake forest to the full-public fit."
+  },
+  "decisions": {
+    "fail": "record-data-scale-does-not-support-refit",
+    "pass": "record-data-scale-supports-full-public-fit"
+  },
+  "diagnostic_status": {
+    "authority": "Recommendation evidence for an operational final-fit swap only. It does not promote a model candidate and does not change any score gate of final-public-refit-v1.",
+    "seed_reuse_note": "Seeds are freshly derived from the E5 decision core with a new prefix; E5 seeds themselves are not reused."
+  },
+  "epsilon": 0.014204545454545449,
+  "experiment": "data-scale-diagnostic-v1",
+  "fresh_seeds": [
+    1558982291,
+    995925147,
+    1201315901,
+    850766810,
+    462283710
+  ],
+  "metric": {
+    "delta_definition": "paired Premium-tier official score difference (fit-outer-full minus fit-train-split-only) pooled per seed over held-out folds",
+    "protocol": "runtime-in-the-loop identical to e5-brake-conditioned-v1: shared parent from the shipped artifact, promotions through budget_brake_router.promote_premium_brake"
+  },
+  "output": {
+    "audit_relative": "build/run-data-scale-diagnostic/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-data-scale-diagnostic/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "data-scale-diagnostic-v1",
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; collision fails closed.",
+    "core_sha256": "727c07e6c7ae9c55fbf6c0d659c2594ee2cfd254f3bde635e4cc811dbbfc85ba",
+    "forbidden_previous_seeds": [
+      20260821,
+      20260822,
+      20260823,
+      20260824,
+      20260825,
+      1524653244,
+      655399222,
+      544868342,
+      1444644023,
+      2132086428,
+      292577053,
+      1003090710,
+      253011083,
+      534284889,
+      2049515330,
+      515672025,
+      572878001,
+      763133369,
+      68726617,
+      1988695219,
+      929558432,
+      1924177588
+    ],
+    "n": 5,
+    "prefix": "scrooge-data-scale-diagnostic-v1",
+    "skip_digest_on_collision": false
+  },
+  "thresholds": {
+    "mean_delta_min": 0.0005,
+    "worst_seed_delta_min_inclusive": -0.001
+  }
+}

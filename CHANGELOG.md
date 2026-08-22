@@ -21,3 +21,6 @@ SPDX-License-Identifier: Apache-2.0
 ### 변경
 
 - 제출 진입점을 `budget_brake_router`로 바꿨습니다.
+- 잔여 묶음이 0.75 이상인 Premium 배치에는 부모 가드와 잔여 K1 제외를
+  적용하고, 한 묶음이 0.75 이상인 Fast 배치에는 예측 상한 1.07을
+  적용합니다. 공개 Dev 점수 `0.669517`은 그대로입니다.

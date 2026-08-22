@@ -1,0 +1,134 @@
+{
+  "arms": {
+    "baseline": {
+      "definition": "Exact research/export/brake_artifact.py recipe refit per fold on outer-train only: ExtraTreesRegressor(n_estimators=200, max_depth=4, min_samples_leaf=20, max_features=1.0, criterion='squared_error', bootstrap=False, n_jobs=1, random_state=20260816); target=scores[:,2]-scores[:,1]; sample_weight=min(generations[:,1],generations[:,2]); features=ossp_router.cost_calibrated_router.structural_features/14.",
+      "name": "uplift-xtrees-refit",
+      "rank_key": "predicted_delta_k_desc"
+    },
+    "primary": {
+      "definition": "Same fitted forest as baseline; rank key is predicted_delta_k / max(safe_increment_k_minus_a, 1e-12) where safe_increment uses the frozen premium safe costs row[2]-row[1]. Eligibility, brake_ratio, count_cap, denylist and runaway constants are unchanged.",
+      "name": "density-xtrees-refit",
+      "rank_key": "density_pred_delta_k_over_safe_increment"
+    },
+    "secondary_evidence_only": {
+      "definition": "Weighted closed-form ridge alpha=100 on standardized 14-d structural features (outer-train mean/std), intercept column unpenalized, weights=min(generations ax31, generations k1), target=scores[:,2]-scores[:,1], ranked by density like primary. Reported for evidence; selection_use=none under this protocol.",
+      "name": "density-ridge-standardized-wls",
+      "rank_key": "density_pred_delta_k_over_safe_increment"
+    }
+  },
+  "context_frozen": {
+    "artifact": "src/ossp_router/resources/budget-brake-router.v1.json",
+    "brake_constants": {
+      "brake_ratio": 3.25,
+      "count_cap": 48,
+      "denylist_families": [
+        "korean_reasoning",
+        "python_program",
+        "rule_reasoning"
+      ],
+      "runaway_absolute": 0.17152750745633213,
+      "runaway_light_fraction": 0.02
+    },
+    "note": "Cost heads, ladder caps, family guard multipliers and every brake constant stay shipped/frozen. Only the promotion rank key varies between arms.",
+    "parent_allocator": "feasibility_ladder._select_premium_configured with k1_enabled=false (two-action Light/AX31)",
+    "predicted_caps_premium": 3.25
+  },
+  "decision_reasons": {
+    "fail": "Primary arm failed a pre-registered gate on fresh seeds. Keep the current runtime.",
+    "pass": "Runtime-in-the-loop grouped OOF passed all gates on fresh seeds. This opens the promotion window only; integration requires a separate sealed protocol with full-public refit."
+  },
+  "decisions": {
+    "fail": "record-e5-no-promote-current-runtime",
+    "pass": "record-e5-promotion-window-open-density-xtrees"
+  },
+  "epsilon": 0.014204545454545449,
+  "epsilon_formula": "0.5 * sum_f abs(p_train_f - p_dev_f) from materialized inputs family counts only",
+  "equivalence_gate": {
+    "definition": "Composed path (shared parent via feasibility_ladder._select_premium_configured plus budget_brake_router.promote_premium_brake with an injected shipped-quality vector) must reproduce budget_brake_router.make_submission premium decisions byte-identically on the full Train 1760 replay.",
+    "required": true
+  },
+  "experiment": "e5-brake-conditioned-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Paired Premium-tier official score difference (arm minus baseline) on held-out fold episodes pooled per seed; scores are public outcomes of the chosen model only.",
+    "protocol_note": "Unlike E1-E1F this evaluates through the actual serving allocator replica, not exact-cost oracles. The frozen-runtime fidelity failure showed exact-cost-selected heads do not transfer to the brake allocator."
+  },
+  "motivation": {
+    "fidelity_decision_core": "1c4b8144378f55779aaf1cf3e78424abd749a93e3d4e33744ccda82304b7cbc9",
+    "root_cause": "record-chuf-frozen-runtime-fidelity-fail-current-runtime showed heads selected against exact-cost OOF allocators do not transfer to the frozen brake allocator (realized delta-K 0.517/0.5625 versus CHUF assumed 0.2709/0.3099). E5 therefore selects the ranking key inside the serving allocator itself.",
+    "red_team_verdict": "MODEL SOUND_GATE TOO STRICT"
+  },
+  "fresh_seeds": [
+    763133369,
+    68726617,
+    1988695219,
+    929558432,
+    1924177588
+  ],
+  "n_fresh_seeds": 5,
+  "output": {
+    "audit_relative": "build/run-e5-brake-conditioned/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e5-brake-conditioned/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e5-brake-conditioned-v1",
+  "runtime_in_the_loop": {
+    "parent_allocation": "Once per fold batch, shared across arms, from the shipped artifact only.",
+    "promotions": "budget_brake_router.promote_premium_brake called directly per arm with an injected quality vector; the sort key inside the function is (-quality, digest) so the density key is applied by transforming the vector before injection.",
+    "scoring": "Public outcomes only, after decisions are frozen."
+  },
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; i=0..4. Collision with any previously used seed fails closed.",
+    "core_sha256": "1c4b8144378f55779aaf1cf3e78424abd749a93e3d4e33744ccda82304b7cbc9",
+    "forbidden_previous_seeds": [
+      20260821,
+      20260822,
+      20260823,
+      20260824,
+      20260825,
+      1524653244,
+      655399222,
+      544868342,
+      1444644023,
+      2132086428,
+      292577053,
+      1003090710,
+      253011083,
+      534284889,
+      2049515330,
+      515672025,
+      572878001
+    ],
+    "n": 5,
+    "prefix": "scrooge-e5-brake-conditioned-v1",
+    "skip_digest_on_collision": false
+  },
+  "stress_views": {
+    "definition": "Per seed, one batch per prompt_family containing every episode of that family (each episode uses its own fold's fitted head). Allocator runs end-to-end per batch per arm.",
+    "purpose": "Family-homogeneous composition shift; the actual-ratio gate applies to every batch.",
+    "view_min_n": 20
+  },
+  "thresholds": {
+    "mean_delta_min": 0.002,
+    "secondary_selection_use": "none",
+    "stress_actual_ratio_max": 3.8,
+    "tvball_worst_min": -0.003,
+    "worst_seed_delta_min_exclusive": 0.0
+  },
+  "tv_ball": {
+    "formula": "tv_worst = pooled_delta + epsilon * (min_family_delta - max_family_delta)",
+    "n_ge": 20,
+    "radius_source": "materialized inputs family counts only; identical to chuf-tvball-confirmation-v1"
+  }
+}

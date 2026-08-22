@@ -1,0 +1,79 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "cond-fast-1.07-0.75",
+      "cond-fast-1.07-0.50",
+      "cond-fast-1.07-0.25",
+      "cond-fast-1.05-0.75",
+      "cond-fast-1.05-0.50",
+      "cond-fast-1.05-0.25"
+    ],
+    "knobs": {
+      "cond-fast-1.05-0.25": {
+        "fast_cap": 1.05,
+        "threshold": 0.25
+      },
+      "cond-fast-1.05-0.50": {
+        "fast_cap": 1.05,
+        "threshold": 0.5
+      },
+      "cond-fast-1.05-0.75": {
+        "fast_cap": 1.05,
+        "threshold": 0.75
+      },
+      "cond-fast-1.07-0.25": {
+        "fast_cap": 1.07,
+        "threshold": 0.25
+      },
+      "cond-fast-1.07-0.50": {
+        "fast_cap": 1.07,
+        "threshold": 0.5
+      },
+      "cond-fast-1.07-0.75": {
+        "fast_cap": 1.07,
+        "threshold": 0.75
+      }
+    },
+    "selection": "Among passers, prefer the earlier candidate: larger Fast cap, then higher threshold."
+  },
+  "context_frozen": {
+    "note": "Public max family fraction is about 0.18. Grid 0.25/0.50/0.75 is the remaining thirds of (0,1], not a fit to 1.25. Caps are the E12 values that cleared Fast views. 1.08 is not a candidate. Below threshold the arm is shipped Fast 1.11.",
+    "prior": "E12 global 1.07 closes Fast views but fails Dev veto. E10 showed a residual-fraction condition can keep the official mix identical."
+  },
+  "decision_reasons": {
+    "fail": "No composition-conditioned Fast cap cleared official identity, Fast view inflation, or Dev veto. Keep the current runtime.",
+    "pass": "A max-family-fraction-conditioned Fast cap kept the official mix identical to shipped and put every Fast composition view under the official cap including inflation."
+  },
+  "decisions": {
+    "fail": "record-e13-no-promote-current-runtime",
+    "pass": "record-e13-promotion-window-open"
+  },
+  "experiment": "e13-conditional-fast-cap-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Official mix must stay bit-identical to shipped. Every Fast composition view actual and inflated must stay under 1.25. Balanced and Premium stay shipped.",
+    "selection": "Larger Fast cap, then higher threshold."
+  },
+  "output": {
+    "audit_relative": "build/run-e13-conditional-fast-cap/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e13-conditional-fast-cap/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e13-conditional-fast-cap-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002
+  }
+}

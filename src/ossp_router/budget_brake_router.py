@@ -3,10 +3,17 @@
 
 """Premium overlay that promotes ax31 to axk1-think under a predicted-budget brake.
 
-Fast and Balanced stay on the family-guard path so those decisions stay
-bit-identical. Premium keeps the ladder's two-action allocation, then
+Fast and Balanced stay on the family-guard path so mixed public
+decisions stay bit-identical. When one family is at least 75% of a
+Fast batch, the predicted cap tightens from 1.11 to 1.07. Runaway
+stays 0.165. Premium keeps the ladder's two-action allocation, then
 promotes in predicted quality order while the batch predicted Premium
 ratio stays under the frozen brake.
+
+When the incoming Premium batch is at least 75% residual family
+(``other``), the parent AX31 increment uses the shipped family-guard
+2.5 and residual rows are added to the brake denylist. Mixed public
+batches sit near 10% residual and stay on the unguarded path.
 """
 
 from __future__ import annotations
@@ -61,6 +68,9 @@ REQUIRED_BRAKE_FIELDS = {
 }
 FEATURE_SIGNATURE = "ossp_router.cost_calibrated_router.structural_features/14"
 FINITE_COMPARE = 1e-12
+CONDITIONAL_PREMIUM_RESIDUAL_THRESHOLD = 0.75
+CONDITIONAL_FAST_FAMILY_THRESHOLD = 0.75
+CONDITIONAL_FAST_CAP = 1.07
 _AX31 = MODEL_IDS[1]
 _K1 = MODEL_IDS[2]
 
@@ -94,6 +104,48 @@ def _load_resource_text() -> str:
 
 def content_digest(episode: Episode) -> str:
     return hashlib.sha256(episode_text(episode).encode("utf-8")).hexdigest()
+
+
+def residual_fraction(families: Sequence[str]) -> float:
+    if not families:
+        return 0.0
+    residual = family_guard_router.RESIDUAL_FAMILY
+    return float(sum(family == residual for family in families)) / float(len(families))
+
+
+def premium_residual_composition_guard(families: Sequence[str]) -> bool:
+    """Return whether the residual-majority Premium guard should bind."""
+
+    return residual_fraction(families) + 1e-15 >= CONDITIONAL_PREMIUM_RESIDUAL_THRESHOLD
+
+
+def max_family_fraction(families: Sequence[str]) -> float:
+    if not families:
+        return 0.0
+    counts: dict[str, int] = {}
+    for family in families:
+        counts[family] = counts.get(family, 0) + 1
+    return float(max(counts.values())) / float(len(families))
+
+
+def fast_family_composition_guard(families: Sequence[str]) -> bool:
+    """Return whether the family-majority Fast cap should bind."""
+
+    return max_family_fraction(families) + 1e-15 >= CONDITIONAL_FAST_FAMILY_THRESHOLD
+
+
+def _conditional_brake_block(
+    artifact: BrakeArtifact, active: bool
+) -> Mapping[str, Any]:
+    if not active:
+        return artifact.budget_brake
+    block = dict(artifact.budget_brake)
+    denylist = list(block["denylist_families"])
+    extra = family_guard_router.RESIDUAL_FAMILY
+    if extra not in denylist:
+        denylist.append(extra)
+    block["denylist_families"] = tuple(denylist)
+    return block
 
 
 def _require_same_length(tree: Mapping[str, Any], keys: Sequence[str]) -> int:
@@ -303,6 +355,89 @@ def premium_prediction_row(
     return _premium_prediction(episode, policy, artifact.family_guard.base)
 
 
+def _premium_residual_multiplier(
+    episode: Episode,
+    artifact: BrakeArtifact,
+    residual_multiplier: Optional[float],
+) -> float:
+    if residual_multiplier is None:
+        return family_guard_router.guard_multiplier(episode, artifact.family_guard)
+    if family_guard_router.prompt_family(episode) != family_guard_router.RESIDUAL_FAMILY:
+        return 1.0
+    try:
+        multiplier = float(residual_multiplier)
+    except (TypeError, ValueError) as error:
+        raise ProtocolError("premium residual multiplier is invalid") from error
+    low, high = family_guard_router.MULTIPLIER_CLIP
+    if not math.isfinite(multiplier) or multiplier < low or multiplier > high:
+        raise ProtocolError("premium residual multiplier is outside the family-guard clip")
+    return multiplier
+
+
+def guard_premium_parent_costs(
+    episode: Episode,
+    costs: Sequence[float],
+    artifact: BrakeArtifact,
+    *,
+    residual_multiplier: Optional[float] = None,
+) -> Tuple[float, float, float]:
+    """Inflate residual AX31 increment for Premium parent allocation only.
+
+    The brake keeps the unguarded predicted costs so K1 increment
+    accounting is not double-counted. ``residual_multiplier`` overrides
+    the shipped family-guard constant for the residual family only.
+    Other families stay unguarded. The override must stay inside the
+    family-guard clip.
+    """
+
+    if len(costs) != 3:
+        raise ProtocolError("premium parent costs must have three models")
+    light = float(costs[0])
+    ax31 = float(costs[1])
+    k1 = float(costs[2])
+    multiplier = _premium_residual_multiplier(
+        episode, artifact, residual_multiplier
+    )
+    if multiplier > 1.0:
+        ax31 = light + max(ax31 - light, 0.0) * multiplier
+    return (light, ax31, k1)
+
+
+def guard_premium_brake_costs(
+    episode: Episode,
+    costs: Sequence[float],
+    artifact: BrakeArtifact,
+    *,
+    residual_multiplier: Optional[float] = None,
+) -> Tuple[float, float, float]:
+    """Inflate residual K1 increment for brake accounting only.
+
+    Light and AX31 stay unguarded so parent spend is not double-counted.
+    The multiplier is the shipped family-guard constant unless overridden.
+    """
+
+    if len(costs) != 3:
+        raise ProtocolError("premium brake costs must have three models")
+    light = float(costs[0])
+    ax31 = float(costs[1])
+    k1 = float(costs[2])
+    multiplier = _premium_residual_multiplier(
+        episode, artifact, residual_multiplier
+    )
+    if multiplier > 1.0:
+        k1 = ax31 + max(k1 - ax31, 0.0) * multiplier
+    return (light, ax31, k1)
+
+
+def premium_parent_prediction_row(
+    episode: Episode, policy: RoutingPolicy, artifact: BrakeArtifact
+) -> Tuple[float, Tuple[float, float, float]]:
+    """Premium parent row: family-guard AX31 increment, unguarded K1."""
+
+    uplift, costs = premium_prediction_row(episode, policy, artifact)
+    return uplift, guard_premium_parent_costs(episode, costs, artifact)
+
+
 def predicted_premium_spend(
     models: Sequence[str], costs: Sequence[Sequence[float]]
 ) -> float:
@@ -389,21 +524,41 @@ def select_premium_with_brake(
     families: Optional[Sequence[str]] = None,
     digests: Optional[Sequence[str]] = None,
 ) -> Tuple[str, ...]:
-    """Ladder two-action Premium allocation, then the frozen brake loop."""
+    """Ladder two-action Premium allocation, then the frozen brake loop.
+
+    Residual-majority batches (fraction ≥ 0.75) reprice residual AX31
+    for the parent only and add ``other`` to the brake denylist. Brake
+    spend stays on unguarded predicted costs. Mixed public batches do
+    not bind.
+    """
 
     if len(premium_rows) != len(inputs.episodes):
         raise ProtocolError("budget brake premium rows must align with the batch")
-    predicted_cap = float(artifact.value["predicted_caps"]["premium"])
-    parent, _ratio = feasibility_ladder._select_premium_configured(
-        inputs, premium_rows, predicted_cap, artifact.family_guard.base
-    )
     episodes = inputs.episodes
     if families is None:
         families = tuple(family_guard_router.prompt_family(episode) for episode in episodes)
+    if len(families) != len(episodes):
+        raise ProtocolError("budget brake families must align with the batch")
+    active = premium_residual_composition_guard(families)
+    if active:
+        parent_rows = tuple(
+            (
+                row[0],
+                guard_premium_parent_costs(episode, row[1], artifact),
+            )
+            for episode, row in zip(episodes, premium_rows)
+        )
+    else:
+        parent_rows = premium_rows
+    predicted_cap = float(artifact.value["predicted_caps"]["premium"])
+    parent, _ratio = feasibility_ladder._select_premium_configured(
+        inputs, parent_rows, predicted_cap, artifact.family_guard.base
+    )
     costs = tuple(row[1] for row in premium_rows)
+    brake_block = _conditional_brake_block(artifact, active)
     if quality is None:
         eligible = eligible_promotion_indices(
-            parent, families, costs, artifact.budget_brake
+            parent, families, costs, brake_block
         )
         scored = [0.0] * len(episodes)
         if digests is None:
@@ -424,7 +579,7 @@ def select_premium_with_brake(
     elif digests is None:
         digests = tuple(content_digest(episode) for episode in episodes)
     return promote_premium_brake(
-        parent, quality, families, costs, digests, artifact.budget_brake
+        parent, quality, families, costs, digests, brake_block
     )
 
 
@@ -456,6 +611,38 @@ def _plan_from_models(
     )
 
 
+def _fast_plan_with_cap(
+    inputs: InputBatch,
+    policy: RoutingPolicy,
+    artifact: BrakeArtifact,
+    cap: float,
+) -> BrakePlan:
+    """Family-guard Fast allocation with an overridden predicted cap."""
+
+    guarded = artifact.family_guard
+    value = guarded.value
+    predictions = tuple(
+        family_guard_router.guarded_prediction(episode, policy, guarded)
+        for episode in inputs.episodes
+    )
+    selected, ratio = feasibility_ladder.select_fast_balanced(
+        predictions,
+        cap=float(cap),
+        runaway_fraction=float(value["runaway_fraction"]),
+        max_upgrade_fraction=float(value["max_upgrade_fraction"]),
+    )
+    if any(model_id == _K1 for model_id in selected):
+        raise ProtocolError("budget brake Fast/Balanced selected K1")
+    return _plan_from_models(
+        inputs,
+        policy,
+        "fast",
+        selected,
+        ratio,
+        float(cap),
+    )
+
+
 def make_submission(
     inputs: InputBatch,
     policy: RoutingPolicy,
@@ -469,7 +656,15 @@ def make_submission(
         policy
     ):
         raise ProtocolError("budget brake artifact policy mismatch")
-    if tier != "premium":
+    if tier == "balanced" or (
+        tier == "fast"
+        and not fast_family_composition_guard(
+            tuple(
+                family_guard_router.prompt_family(episode)
+                for episode in inputs.episodes
+            )
+        )
+    ):
         plan = family_guard_router.make_submission(
             inputs, policy, artifact.family_guard, tier
         )
@@ -478,6 +673,8 @@ def make_submission(
         return BrakePlan(
             plan.submission, plan.predicted_budget_ratio, plan.predicted_cap
         )
+    if tier == "fast":
+        return _fast_plan_with_cap(inputs, policy, artifact, CONDITIONAL_FAST_CAP)
     premium_rows = tuple(
         premium_prediction_row(episode, policy, artifact)
         for episode in inputs.episodes

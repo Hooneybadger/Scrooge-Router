@@ -1,0 +1,174 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "naked-fast-1.08",
+      "leftover-residual-2.62",
+      "leftover-clip-3.25",
+      "leftover-clip-3.50",
+      "leftover-word-1.25",
+      "leftover-word-1.50",
+      "leftover-word-2.00",
+      "leftover-word-2.50",
+      "leftover-cond-e11-0.67",
+      "leftover-cond-e11-0.50",
+      "leftover-e10-0.50"
+    ],
+    "knobs": {
+      "leftover-clip-3.25": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.11,
+        "leftover_fast_mult": null,
+        "residual_multiplier": 3.25,
+        "shipped_switches": false,
+        "unclipped": true,
+        "unify_premium": true
+      },
+      "leftover-clip-3.50": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.11,
+        "leftover_fast_mult": null,
+        "residual_multiplier": 3.5,
+        "shipped_switches": false,
+        "unclipped": true,
+        "unify_premium": true
+      },
+      "leftover-cond-e11-0.50": {
+        "e10_threshold": null,
+        "e11_cap": 0.5,
+        "fast_cap": null,
+        "leftover_fast_mult": null,
+        "residual_multiplier": null,
+        "shipped_switches": true,
+        "unclipped": false,
+        "unify_premium": false
+      },
+      "leftover-cond-e11-0.67": {
+        "e10_threshold": null,
+        "e11_cap": 0.67,
+        "fast_cap": null,
+        "leftover_fast_mult": null,
+        "residual_multiplier": null,
+        "shipped_switches": true,
+        "unclipped": false,
+        "unify_premium": false
+      },
+      "leftover-e10-0.50": {
+        "e10_threshold": 0.5,
+        "e11_cap": null,
+        "fast_cap": null,
+        "leftover_fast_mult": null,
+        "residual_multiplier": null,
+        "shipped_switches": true,
+        "unclipped": false,
+        "unify_premium": false
+      },
+      "leftover-residual-2.62": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.11,
+        "leftover_fast_mult": null,
+        "residual_multiplier": 2.62,
+        "shipped_switches": false,
+        "unclipped": false,
+        "unify_premium": true
+      },
+      "leftover-word-1.25": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.11,
+        "leftover_fast_mult": 1.25,
+        "residual_multiplier": null,
+        "shipped_switches": false,
+        "unclipped": false,
+        "unify_premium": true
+      },
+      "leftover-word-1.50": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.11,
+        "leftover_fast_mult": 1.5,
+        "residual_multiplier": null,
+        "shipped_switches": false,
+        "unclipped": false,
+        "unify_premium": true
+      },
+      "leftover-word-2.00": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.11,
+        "leftover_fast_mult": 2.0,
+        "residual_multiplier": null,
+        "shipped_switches": false,
+        "unclipped": false,
+        "unify_premium": true
+      },
+      "leftover-word-2.50": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.11,
+        "leftover_fast_mult": 2.5,
+        "residual_multiplier": null,
+        "shipped_switches": false,
+        "unclipped": false,
+        "unify_premium": true
+      },
+      "naked-fast-1.08": {
+        "e10_threshold": null,
+        "e11_cap": null,
+        "fast_cap": 1.08,
+        "leftover_fast_mult": null,
+        "residual_multiplier": null,
+        "shipped_switches": false,
+        "unclipped": false,
+        "unify_premium": false
+      }
+    },
+    "leftover_fast_families": [
+      "english_multiple_choice",
+      "word_problem"
+    ],
+    "selection": "Among leftover passers, prefer the earlier candidate. Smaller leftover Fast multiplier before larger. Less aggressive E11 before more aggressive."
+  },
+  "context_frozen": {
+    "note": "These arms were previously refused as leftover or clip-breaking. 1.08 is the original select_family_guard Fast grid point E12 skipped. 2.62 is the leftover fit to Dev residual inflated 4.034. Clip 3.25/3.50 sit above the family-guard clip 3.0. word_problem and english_multiple_choice Fast multipliers are audit leftovers; Train ratios are 1.009 and 1.0. Conditional E11 uses the E10 residual threshold 0.75. E10 0.50 is the leftover underbind below the 0.744 digest-head mix. Pair views are every eligible family pair with n>=20 each.",
+    "prior": "E15 closed the always-on mature replacement. This protocol records the leftover arms instead of leaving them untried."
+  },
+  "decision_reasons": {
+    "fail": "No leftover arm cleared official safety, Fast composition and pair views, residual Premium inflation, or Dev veto. Keep the current runtime.",
+    "pass": "A leftover arm cleared official safety, Fast composition and pair views, and residual Premium inflation inside Dev veto. This is a leftover window, not a mature promotion."
+  },
+  "decisions": {
+    "fail": "record-e16-no-promote-current-runtime",
+    "pass": "record-e16-leftover-window-open"
+  },
+  "experiment": "e16-leftover-completion-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Official mix need not stay bit-identical. Official spend must stay under the official caps and below the 95 percent near line. Every Fast composition and pair view actual and inflated must stay under 1.25. Residual-only Premium actual and inflated must stay under 4.0. Dev veto is -0.002 versus the shipped E10+E13 pin.",
+    "selection": "Earlier leftover candidate first."
+  },
+  "output": {
+    "audit_relative": "build/run-e16-leftover-completion/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e16-leftover-completion/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e16-leftover-completion-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "arms": {
+    "baseline": "shipped",
+    "candidates": [
+      "fast-cap-1.09",
+      "fast-cap-1.07",
+      "fast-cap-1.05"
+    ],
+    "fast_caps": {
+      "fast-cap-1.05": 1.05,
+      "fast-cap-1.07": 1.07,
+      "fast-cap-1.09": 1.09
+    },
+    "selection": "Among passers, prefer the earlier candidate (larger Fast cap, least tighten)."
+  },
+  "context_frozen": {
+    "note": "Shipped Fast cap 1.11. Grid steps down by 0.02. Runaway stays frozen 0.165. Balanced and Premium stay shipped."
+  },
+  "decision_reasons": {
+    "fail": "No global Fast cap tighten cleared Fast view inflation and Dev veto. Keep the current runtime.",
+    "pass": "A global Fast cap tighten put every Fast composition view under the official cap including inflation."
+  },
+  "decisions": {
+    "fail": "record-e12-no-promote-current-runtime",
+    "pass": "record-e12-promotion-window-open"
+  },
+  "experiment": "e12-fast-cap-tighten-v1",
+  "family_definition": "ossp_router.family_guard_router.prompt_family",
+  "metric": {
+    "definition": "Every Fast composition view actual and inflated under 1.25. Balanced/Premium bit-identical to shipped. Dev is a veto.",
+    "selection": "Larger Fast cap among passers."
+  },
+  "output": {
+    "audit_relative": "build/run-e12-fast-cap-tighten/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e12-fast-cap-tighten/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "pinned_dev_final_score": 0.669517045455,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e12-fast-cap-tighten-v1",
+  "schema_version": 1,
+  "thresholds": {
+    "dev_delta_min_exclusive": -0.002
+  }
+}

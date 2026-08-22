@@ -1,0 +1,223 @@
+{
+  "architecture": {
+    "allocator": {
+      "fast_balanced": "E2 point, then e4.apply_family_increment_multiplier other=2.5, clamp; feasibility.select_fast_balanced",
+      "fold_local_rebuy": false,
+      "pooled_public_batch_once": true,
+      "premium_costs": "light=point[:,0], AX31/K1=conservative[:,1:3], clamp",
+      "premium_k1": "budget_brake_router.promote_premium_brake; comparator qk vs candidate qk",
+      "premium_parent": "feasibility _select_premium cap 3.25; identical heads"
+    },
+    "artifact": {
+      "balanced_cap": 1.45,
+      "brake_ratio": 3.25,
+      "count_cap": 48,
+      "denylist_families": [
+        "korean_reasoning",
+        "python_program",
+        "rule_reasoning"
+      ],
+      "fast_cap": 1.11,
+      "max_upgrade_fraction": 0.75,
+      "multipliers": {
+        "other": 2.5
+      },
+      "premium_cap": 3.25,
+      "runaway_absolute": 0.17152750745633213,
+      "runaway_fraction": 0.16500000000000015,
+      "runaway_light_fraction": 0.02,
+      "runaway_light_fraction_used_in_eligibility": false
+    },
+    "candidate": "chuf-v1",
+    "e2_surfaces": "research.lab.e2_cost_uncertainty.oof_cost_surfaces",
+    "family_definition": "ossp_router.cost_calibrated_router.prompt_family",
+    "official_caps": {
+      "balanced": 2.0,
+      "fast": 1.25,
+      "premium": 4.0
+    },
+    "quality": {
+      "candidate": "same pred_qa + CHUF pred_qk",
+      "comparator": "oof_chuf_heads baseline qa/qk",
+      "same_seed_shared_surfaces": true
+    },
+    "runtime_predicted_caps": {
+      "balanced": 1.45,
+      "fast": 1.11,
+      "premium": 3.25
+    },
+    "stress_95_caps": {
+      "balanced": 1.9,
+      "fast": 1.1875,
+      "premium": 3.8
+    }
+  },
+  "blocked_seeds": [
+    20260821,
+    20260822,
+    20260823,
+    20260824,
+    20260825,
+    253011083,
+    292577053,
+    515672025,
+    534284889,
+    544868342,
+    572878001,
+    655399222,
+    1003090710,
+    1444644023,
+    1524653244,
+    2049515330,
+    2132086428
+  ],
+  "candidate": "chuf-v1",
+  "confirmation": {
+    "core_sha256": "2acba355a7c6863c4ae1971ba03e135041efcf0f9def9400135262734a569e6d",
+    "decision": "record-chuf-tvball-confirmation-pass-await-risk-phase",
+    "protocol_sha256": "37fa19fe8ab20a90773ad9568074e73ec9e0721a29d22f5bf80c8f939494a04c"
+  },
+  "decisions": {
+    "fail": "record-chuf-phase2-fail-current-runtime",
+    "no_valid_reference": "record-chuf-phase2-no-valid-reference-current-runtime",
+    "pass": "record-chuf-phase2-pass-await-independent-audit"
+  },
+  "e1f_decision_core_sha256": "f4cca0d425b47bda6e42be9b5c11b64e3cf9c57efd2810f11b22b1bd6051ba79",
+  "epsilon": 0.014204545454545449,
+  "experiment": "chuf-predicted-cost-phase2-v1",
+  "family_counts": {
+    "center": {
+      "english_multiple_choice": 0.09431818181818181,
+      "korean_multiple_choice": 0.18295454545454545,
+      "korean_reasoning": 0.022727272727272728,
+      "latex_math": 0.05795454545454545,
+      "long_context": 0.09090909090909091,
+      "other": 0.10643939393939394,
+      "python_program": 0.13636363636363635,
+      "rule_reasoning": 0.16022727272727272,
+      "symbolic_math": 0.06780303030303031,
+      "word_problem": 0.0803030303030303
+    },
+    "dev": {
+      "english_multiple_choice": 83,
+      "korean_multiple_choice": 161,
+      "korean_reasoning": 20,
+      "latex_math": 59,
+      "long_context": 80,
+      "other": 90,
+      "python_program": 119,
+      "rule_reasoning": 141,
+      "symbolic_math": 60,
+      "word_problem": 67
+    },
+    "n_dev": 880,
+    "n_pool": 2640,
+    "n_train": 1760,
+    "pool": {
+      "english_multiple_choice": 249,
+      "korean_multiple_choice": 483,
+      "korean_reasoning": 60,
+      "latex_math": 153,
+      "long_context": 240,
+      "other": 281,
+      "python_program": 360,
+      "rule_reasoning": 423,
+      "symbolic_math": 179,
+      "word_problem": 212
+    },
+    "train": {
+      "english_multiple_choice": 166,
+      "korean_multiple_choice": 322,
+      "korean_reasoning": 40,
+      "latex_math": 94,
+      "long_context": 160,
+      "other": 191,
+      "python_program": 241,
+      "rule_reasoning": 282,
+      "symbolic_math": 119,
+      "word_problem": 145
+    }
+  },
+  "family_definition": "ossp_router.cost_calibrated_router.prompt_family",
+  "fold_local_rebuy": false,
+  "fresh_seeds": [
+    1961852001,
+    1797397368,
+    1763238305,
+    999558656,
+    1988874908,
+    305408514,
+    400818725,
+    116341498,
+    1592039285,
+    215679302,
+    1124696458,
+    1980863820
+  ],
+  "n_fresh_seeds": 12,
+  "output": {
+    "audit_relative": "build/phase2-chuf-predicted-cost/episode-audit.json",
+    "confirm_report_forbidden": "build/confirm-chuf-tvball/report.json",
+    "e1f_report_forbidden": "build/compare-e1f-cost-conditioned-frontier/report.json",
+    "report_relative": "build/phase2-chuf-predicted-cost/report.json"
+  },
+  "pins": {
+    "budget_brake_sha256": "01226b5678f1f9e50fe1537ffc7f2e82ba88771ddd0693cff5edbba655a3bb6e",
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "e1f_source_sha256": "bbbb7f94521ad071b6378618e969ce490700c4981efaff9bded72d8d205b6e6d",
+    "e2_source_sha256": "eee8f8f43f6f4c80cbbb42251cfc85381985f43c165ed0cf58f9817d431339de",
+    "e4_source_sha256": "7082c1ee58970a47a046be917b706d61ae30bbfe93984aa78484fa6f793b5b8a",
+    "family_guard_sha256": "492944065f98786915f2c555f84cf60714bd6580ad75ae0f783158b13c9bf038",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "chuf-predicted-cost-phase2-v1",
+  "required_families": [
+    "english_multiple_choice",
+    "korean_multiple_choice",
+    "korean_reasoning",
+    "latex_math",
+    "long_context",
+    "other",
+    "python_program",
+    "rule_reasoning",
+    "symbolic_math",
+    "word_problem"
+  ],
+  "runtime_export": false,
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(CONFIRMATION_CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; i=0..11. Collision or overlap with old E1F seeds or confirmation-12 fails closed and must not skip the next digest.",
+    "core_sha256": "2acba355a7c6863c4ae1971ba03e135041efcf0f9def9400135262734a569e6d",
+    "fail_closed_on_collision": true,
+    "n": 12,
+    "prefix": "scrooge-chuf-predicted-cost-phase2-v1",
+    "skip_digest_on_collision": false
+  },
+  "stress": {
+    "bootstrap_draws": 200,
+    "bootstrap_seed": 557209147,
+    "mixture_diagnostic_only": true,
+    "mixture_draws": 40,
+    "mixture_seed": 419291143
+  },
+  "thresholds": {
+    "mean_official_delta": 0.0003,
+    "mean_premium_delta": 0.001,
+    "premium_k1_max": 48,
+    "tv_worst_min": -0.003,
+    "worst_official_delta": 0.0,
+    "worst_premium_delta": 0.0
+  },
+  "tv_ball": {
+    "cost_formula": "91 vertices: center pooled family p, then for every ordered pair (i,j) i!=j move mass min(epsilon,p_i,1-p_j) from i to j. ratio = sum_f pi_f * family_mean_selected_spend / sum_f pi_f * family_mean_light. max <= official cap.",
+    "cost_vertices": 91,
+    "epsilon_source": "materialized_inputs_family_counts_only",
+    "quality_formula": "tv_worst = official_delta + epsilon * (min_family_delta - max_family_delta)"
+  }
+}
