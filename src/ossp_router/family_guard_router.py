@@ -45,6 +45,7 @@ from .protocol import (
     policy_sha256,
     submission_to_dict,
 )
+from .small_batch import THRESHOLD, effective_cap
 
 
 ARTIFACT_RESOURCE = "family-guard-router.v1.json"
@@ -204,6 +205,12 @@ def make_submission(
     ):
         raise ProtocolError("router artifact policy mismatch")
     predicted_cap = float(value["predicted_caps"][tier])
+    if len(inputs.episodes) < THRESHOLD:
+        predicted_cap = effective_cap(
+            predicted_cap,
+            float(policy.tiers[tier].budget_multiplier),
+            len(inputs.episodes),
+        )
     if tier == "premium":
         return feasibility_ladder.make_submission(inputs, policy, artifact.base, tier)
     predictions = tuple(

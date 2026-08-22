@@ -40,6 +40,7 @@ from .protocol import (
     policy_sha256,
     submission_to_dict,
 )
+from .small_batch import THRESHOLD, effective_cap
 
 
 ARTIFACT_RESOURCE = "budget-brake-router.v1.json"
@@ -388,15 +389,26 @@ def select_premium_with_brake(
     quality: Optional[Sequence[float]] = None,
     families: Optional[Sequence[str]] = None,
     digests: Optional[Sequence[str]] = None,
+    cap_override: Optional[float] = None,
 ) -> Tuple[str, ...]:
-    """Ladder two-action Premium allocation, then the frozen brake loop."""
+    """Ladder two-action Premium allocation, then the frozen brake loop.
+
+    ``cap_override`` lets the small-batch guard tighten the parent budget;
+    below the small-batch threshold the K1 overlay is skipped outright.
+    """
 
     if len(premium_rows) != len(inputs.episodes):
         raise ProtocolError("budget brake premium rows must align with the batch")
-    predicted_cap = float(artifact.value["predicted_caps"]["premium"])
+    predicted_cap = (
+        float(cap_override)
+        if cap_override is not None
+        else float(artifact.value["predicted_caps"]["premium"])
+    )
     parent, _ratio = feasibility_ladder._select_premium_configured(
         inputs, premium_rows, predicted_cap, artifact.family_guard.base
     )
+    if len(inputs.episodes) < THRESHOLD:
+        return tuple(parent)
     episodes = inputs.episodes
     if families is None:
         families = tuple(family_guard_router.prompt_family(episode) for episode in episodes)
@@ -482,7 +494,14 @@ def make_submission(
         premium_prediction_row(episode, policy, artifact)
         for episode in inputs.episodes
     )
-    selected = select_premium_with_brake(inputs, policy, artifact, premium_rows)
+    cap_for_run = effective_cap(
+        float(value["predicted_caps"]["premium"]),
+        float(policy.tiers["premium"].budget_multiplier),
+        len(inputs.episodes),
+    )
+    selected = select_premium_with_brake(
+        inputs, policy, artifact, premium_rows, cap_override=cap_for_run
+    )
     costs = tuple(row[1] for row in premium_rows)
     ratio = predicted_premium_ratio(selected, costs)
     return _plan_from_models(
