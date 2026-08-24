@@ -8,7 +8,10 @@ decisions stay bit-identical. When one family is at least 75% of a
 Fast batch, the predicted cap tightens from 1.11 to 1.07. Runaway
 stays 0.165. Premium keeps the ladder's two-action allocation, then
 promotes in predicted quality order while the batch predicted Premium
-ratio stays under the frozen brake.
+ratio stays under the frozen brake. A single K1 increment is also
+dropped when it exceeds ``min(runaway_absolute, runaway_share ×
+batch predicted light)``. Absent ``runaway_share`` the frozen
+Train-batch absolute is used unchanged.
 
 When the incoming Premium batch is at least 75% residual family
 (``other``), the parent AX31 increment uses the shipped family-guard
@@ -66,6 +69,7 @@ REQUIRED_BRAKE_FIELDS = {
     "runaway_light_fraction",
     "train_full_pred_light",
 }
+OPTIONAL_BRAKE_FIELDS = {"runaway_share"}
 FEATURE_SIGNATURE = "ossp_router.cost_calibrated_router.structural_features/14"
 FINITE_COMPARE = 1e-12
 CONDITIONAL_PREMIUM_RESIDUAL_THRESHOLD = 0.75
@@ -164,7 +168,10 @@ def _require_budget_brake(value: Mapping[str, Any]) -> dict[str, Any]:
     block = value.get(BRAKE_FIELD)
     if not isinstance(block, Mapping):
         raise ProtocolError("budget brake block is missing")
-    if set(block) != REQUIRED_BRAKE_FIELDS:
+    present = set(block)
+    if not REQUIRED_BRAKE_FIELDS <= present or not present <= (
+        REQUIRED_BRAKE_FIELDS | OPTIONAL_BRAKE_FIELDS
+    ):
         raise ProtocolError("budget brake block fields are invalid")
     if block.get("enabled") is not True:
         raise ProtocolError("budget brake block is disabled")
@@ -174,8 +181,15 @@ def _require_budget_brake(value: Mapping[str, Any]) -> dict[str, Any]:
         runaway_absolute = float(block["runaway_absolute"])
         runaway_frac = float(block["runaway_light_fraction"])
         train_light = float(block["train_full_pred_light"])
+        runaway_share = (
+            float(block["runaway_share"]) if "runaway_share" in block else None
+        )
     except (TypeError, ValueError) as error:
         raise ProtocolError("budget brake numeric fields are invalid") from error
+    if runaway_share is not None and not (
+        math.isfinite(runaway_share) and 0.0 < runaway_share <= 1.0
+    ):
+        raise ProtocolError("budget brake runaway_share is outside (0.0, 1.0]")
     if not math.isfinite(brake) or not (1.0 < brake <= 4.0):
         raise ProtocolError("budget brake brake_ratio is outside (1.0, 4.0]")
     if count_cap < 0:
@@ -215,7 +229,7 @@ def _require_budget_brake(value: Mapping[str, Any]) -> dict[str, Any]:
         left = tree["left"]
         if not any(int(node) == -1 for node in left):
             raise ProtocolError("budget brake tree has no leaf")
-    return {
+    parsed = {
         "brake_ratio": brake,
         "clip": (float(clip[0]), float(clip[1])),
         "count_cap": count_cap,
@@ -227,6 +241,9 @@ def _require_budget_brake(value: Mapping[str, Any]) -> dict[str, Any]:
         "runaway_light_fraction": runaway_frac,
         "train_full_pred_light": train_light,
     }
+    if runaway_share is not None:
+        parsed["runaway_share"] = runaway_share
+    return parsed
 
 
 def _family_guard_mapping(value: Mapping[str, Any]) -> dict[str, Any]:
@@ -322,6 +339,25 @@ def predict_quality(episode: Episode, artifact: BrakeArtifact) -> float:
     return predict_quality_features(structural_features(episode), artifact)
 
 
+def batch_runaway_threshold(
+    block: Mapping[str, Any], predicted_light_total: float
+) -> float:
+    """Largest single K1 increment the brake will consider for this batch.
+
+    ``runaway_absolute`` is 2% of the Train full-batch predicted light and does
+    not move with the incoming batch. When ``runaway_share`` is present the
+    threshold also has to hold as a share of this batch's predicted light, so a
+    short or cheap batch cannot let one item take a large slice of its own
+    budget. Absent the field the frozen absolute is used unchanged.
+    """
+
+    absolute = float(block["runaway_absolute"])
+    share = block.get("runaway_share")
+    if share is None:
+        return absolute
+    return min(absolute, float(share) * float(predicted_light_total))
+
+
 def eligible_promotion_indices(
     parent_models: Sequence[str],
     families: Sequence[str],
@@ -333,7 +369,9 @@ def eligible_promotion_indices(
     if not (len(parent_models) == len(families) == len(premium_costs)):
         raise ProtocolError("budget brake promotion arrays must align")
     denylist = set(block["denylist_families"])
-    runaway = float(block["runaway_absolute"])
+    runaway = batch_runaway_threshold(
+        block, math.fsum(float(row[0]) for row in premium_costs)
+    )
     eligible = []
     for index in range(len(parent_models)):
         if parent_models[index] != _AX31:
@@ -478,8 +516,11 @@ def promote_premium_brake(
     ):
         raise ProtocolError("budget brake promotion arrays must align")
     denylist = set(block["denylist_families"])
-    runaway = float(block["runaway_absolute"])
     count_cap = int(block["count_cap"])
+    pred_light_sum = math.fsum(float(row[0]) for row in premium_costs)
+    if pred_light_sum <= 0.0:
+        raise ProtocolError("budget brake predicted light sum is not positive")
+    runaway = batch_runaway_threshold(block, pred_light_sum)
     eligible = []
     for index in range(n_batch):
         if parent_models[index] != _AX31:
@@ -493,9 +534,6 @@ def promote_premium_brake(
             continue
         eligible.append(index)
     eligible.sort(key=lambda index: (-float(quality[index]), digests[index]))
-    pred_light_sum = math.fsum(float(row[0]) for row in premium_costs)
-    if pred_light_sum <= 0.0:
-        raise ProtocolError("budget brake predicted light sum is not positive")
     budget = float(block["brake_ratio"]) * pred_light_sum
     selected = list(parent_models)
     spend = predicted_premium_spend(selected, premium_costs)

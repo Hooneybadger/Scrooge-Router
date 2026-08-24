@@ -1,0 +1,166 @@
+{
+  "arms": {
+    "baseline": {
+      "definition": "Shipped budget_brake_router.make_submission. The Premium brake compares each K1 increment against the frozen runaway_absolute = 0.02 * train_full_pred_light. Brake ratio stays at the E27 value 3.80 and count_cap stays 48.",
+      "name": "shipped-frozen-absolute"
+    },
+    "primary": {
+      "definition": "Identical except the brake block carries runaway_share = 0.06 and the per-item threshold becomes min(runaway_absolute, runaway_share * batch predicted light). Never looser than the shipped rule. Parent ladder, E10 residual hedge, denylist, brake ratio, count cap, Fast and Balanced are unchanged.",
+      "name": "runaway-share-0.06"
+    }
+  },
+  "context_frozen": {
+    "defect": "runaway_absolute is 2% of the Train full batch and does not move with the incoming batch. The artifact already stores runaway_light_fraction = 0.02 but serve time never reads it. On a short or cheap Premium batch one item can take a large share of that batch's own light and the realized ratio leaves the cap.",
+    "e27_side_effect": "Opening the ratio brake 3.25 to 3.80 raised the Dev stress catalogue ruin count. E28 does not reverse E27; it removes the scale dependence that made the opening unsafe off the pinned split sizes.",
+    "separation": "Largest legitimate full-batch buy is 3.8762% of batch light. Smallest largest-buy share among ruining Dev views is 9.9856%. The window is (0.038762, 0.099856); 0.06 sits near its geometric midpoint 0.062214.",
+    "stress_catalogue": "research.lab.cap_certification.build_stress_views, the same frozen catalogue the cap certification layer uses. Binding layer is famdom, dirichlet, half, and small-{300,880}; lofo, lofo-combined, and small-100 stay red team."
+  },
+  "decision_reasons": {
+    "fail": "The batch-relative runaway guard failed a pre-registered gate. Keep the frozen runaway_absolute. Do not add runaway_share to the artifact.",
+    "pass": "runaway_share 0.06 left Train, Dev, and the 2,640 public Premium vectors bit identical, held the binding-layer ruin budget on both stress catalogues, introduced no new ruined view, strictly improved the Dev ruin count, and the neighbour shares each failed a gate. Add runaway_share = 0.06 to budget_brake. Nothing else moves."
+  },
+  "decisions": {
+    "fail": "record-e28-no-promote-current-runtime",
+    "pass": "record-e28-promote-runaway-share-0.06"
+  },
+  "experiment": "e28-batch-relative-runaway-v1",
+  "falsifiability_probe": {
+    "expectation": "Each probe share must fail at least one gate. 0.02 is below the largest legitimate buy share and must break full_batch_identity. 0.09 is above the cheapest ruinous buy share and must break the Dev binding ruin budget.",
+    "shares": [
+      0.02,
+      0.09
+    ]
+  },
+  "fresh_seeds": [
+    660580858,
+    2073661913,
+    1496370400,
+    224028423,
+    2098343477
+  ],
+  "gates": {
+    "binding_ruin_frequency_within_budget": "Binding-layer ruin frequency of the primary arm stays at or under 0.0025 on both Train and Dev stress catalogues. The shipped arm fails this on Dev, so the gate is known to be reachable.",
+    "dev_official_unchanged": "Dev official final score under the primary Premium vector equals the shipped replay to within the pin tolerance.",
+    "dev_ruin_strictly_improved": "Primary ruins strictly fewer Dev views than the shipped arm.",
+    "full_batch_identity": "Premium vectors on Train, Dev, and the 2,640 public batch are bit identical to the shipped arm. A share at or below runaway_absolute / batch light breaks this.",
+    "no_new_ruined_view": "No view that stays under the official cap on the shipped arm may exceed it on the primary arm.",
+    "probe_shares_fail_a_gate": "Every pre-registered neighbour share must fail at least one gate. If the neighbours all pass, the gates do not separate and the run is treated as a failure rather than a pass.",
+    "worst_realized_under_official_cap": "Worst realized Premium ratio over every view stays at or under 4.0 on both splits. The shipped arm fails this on Dev."
+  },
+  "invariants": {
+    "brake_loop_bounds_predicted_ratio": "promote_premium_brake refuses any increment that would push predicted spend past brake_ratio * predicted light. A predicted-ratio ceiling at brake_ratio is therefore unfalsifiable and is not used as a gate.",
+    "fast_balanced_untouched_by_lever": "runaway_share is read only inside promote_premium_brake. Fast and Balanced cannot move, so their identity is not used as a gate.",
+    "shipped_block_without_runaway_share_is_bit_identical": "batch_runaway_threshold returns runaway_absolute unchanged when the field is absent, so adding the lever cannot disturb the shipped artifact. Covered by unit tests, not by this run."
+  },
+  "metric": {
+    "binding_ruin_frequency": "Share of binding-layer views whose realized Premium ratio exceeds the official cap 4.0.",
+    "full_batch_identity": "Element-wise equality of the Premium model vector against the shipped arm on Train, Dev, and Train+Dev.",
+    "worst_realized": "Maximum realized Premium ratio over every view in the catalogue."
+  },
+  "motivation": {
+    "e27_decision": "record-e27-promote-brake-ratio-3.80",
+    "e27_decision_core": "7deca711b20d3992bb1dd551a2600542f549601e1f220c4633f3fe303054fc6b",
+    "parent_queue": "E27 review found four of its ten gates unfalsifiable and left the per-item runaway guard unexamined. This protocol fixes the guard and states which of its own claims can come back false."
+  },
+  "n_fresh_seeds": 5,
+  "output": {
+    "audit_relative": "build/run-e28-batch-relative-runaway/view-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e28-batch-relative-runaway/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e28-batch-relative-runaway-v1",
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; collision fails closed.",
+    "core_sha256": "7deca711b20d3992bb1dd551a2600542f549601e1f220c4633f3fe303054fc6b",
+    "forbidden_previous_seeds": [
+      5801447,
+      20260821,
+      20260822,
+      20260823,
+      20260824,
+      20260825,
+      68726617,
+      119740721,
+      130672035,
+      194508650,
+      213236528,
+      253011083,
+      258662104,
+      292577053,
+      308984772,
+      347547587,
+      418412800,
+      462283710,
+      498402659,
+      515672025,
+      534284889,
+      544868342,
+      572878001,
+      591857826,
+      655399222,
+      695347480,
+      718291179,
+      733043265,
+      733125616,
+      763133369,
+      814704962,
+      825752938,
+      850766810,
+      882441160,
+      889745305,
+      929558432,
+      970535163,
+      995925147,
+      999955836,
+      1003090710,
+      1043997100,
+      1050741673,
+      1080595098,
+      1081333920,
+      1200388099,
+      1201315901,
+      1216182205,
+      1248167884,
+      1283801968,
+      1308133280,
+      1404762205,
+      1444644023,
+      1504795044,
+      1524653244,
+      1558982291,
+      1743996725,
+      1801443602,
+      1814108375,
+      1829377328,
+      1924177588,
+      1966042472,
+      1988695219,
+      1996052478,
+      2049515330,
+      2121011317,
+      2126478916,
+      2132086428
+    ],
+    "n": 5,
+    "prefix": "scrooge-e28-batch-relative-runaway-v1",
+    "skip_digest_on_collision": false
+  },
+  "thresholds": {
+    "binding_ruin_frequency_max": 0.0025,
+    "brake_ratio": 3.8,
+    "count_cap": 48,
+    "official_premium_cap": 4.0,
+    "runaway_share": 0.06
+  }
+}
