@@ -158,7 +158,10 @@ class PromoteInjectionTest(unittest.TestCase):
 
         block = dict(budget_brake_router.load_bundled_artifact().budget_brake)
         block["denylist_families"] = []
+        # Both halves of the runaway guard have to stand down for this fixture:
+        # the frozen absolute and the batch-relative share.
         block["runaway_absolute"] = 100.0
+        block.pop("runaway_share", None)
         block["brake_ratio"] = 3.5
         block["count_cap"] = 48
         return block
