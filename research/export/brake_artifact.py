@@ -35,7 +35,7 @@ FORBIDDEN_OUTPUT_NAMES = {
 
 ARTIFACT_TYPE = "scrooge-budget-brake-router-v1"
 FEATURE_SIGNATURE = "ossp_router.cost_calibrated_router.structural_features/14"
-BRAKE_RATIO = 3.25
+BRAKE_RATIO = 3.8
 COUNT_CAP = 48
 DENYLIST_FAMILIES = (
     "korean_reasoning",

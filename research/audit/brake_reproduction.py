@@ -17,12 +17,12 @@ from research.lab.modeling import load_train, official_score
 ROOT = Path(__file__).resolve().parents[2]
 DEV_INPUTS = ROOT / "data" / "materialized" / "dev" / "inputs.json"
 DEV_OUTCOMES = ROOT / "data" / "dev" / "outcomes.json"
-DEV_FINAL_SCORE = Decimal("0.669517045455")
-DEV_N_K1 = 16
+DEV_FINAL_SCORE = Decimal("0.670710227273")
+DEV_N_K1 = 32
 DEV_RATIOS = {
     "fast": Decimal("1.093011852072"),
     "balanced": Decimal("1.396000996251"),
-    "premium": Decimal("2.160755720509"),
+    "premium": Decimal("2.315836178068"),
 }
 _K1 = MODEL_IDS[2]
 
@@ -116,10 +116,10 @@ def main() -> int:
             )
 
     ok = _gate(
-        "Dev official final_score is 0.669517045455",
+        "Dev official final_score is 0.670710227273",
         Decimal(str(dev["final_score"])) == DEV_FINAL_SCORE,
     ) and ok
-    ok = _gate("Dev n_k1 is 16", int(dev["n_k1"]) == DEV_N_K1) and ok
+    ok = _gate("Dev n_k1 is 32", int(dev["n_k1"]) == DEV_N_K1) and ok
     ratio_ok = True
     for tier, expected in DEV_RATIOS.items():
         ratio_ok = ratio_ok and Decimal(str(dev["tiers"][tier]["budget_ratio"])) == expected
