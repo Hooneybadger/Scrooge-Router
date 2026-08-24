@@ -1,0 +1,161 @@
+{
+  "arms": {
+    "baseline": {
+      "definition": "Shipped budget_brake_router.make_submission, including E10 residual-majority Premium hedge and E13 family-majority Fast cap. Fast/Balanced stay this path on every arm.",
+      "name": "shipped"
+    },
+    "identity_conformal": {
+      "definition": "E25 primary: 3.80 buy then E4 rollback_until_bound with a Train-fold conformal bound. Used only to prove the bound is a no-op. selection_use=none.",
+      "name": "premium-conformal-rollback",
+      "selection_use": "none"
+    },
+    "primary": {
+      "definition": "Fast/Balanced remain shipped. Premium parent stays the shipped two-action ladder (predicted cap 3.25) with the E10 residual-majority parent×2.5 and other denylist when residual fraction ≥ 0.75. promote_premium_brake at brake_ratio=3.80. No conformal bound, no group rollback, no numpy at serve time.",
+      "name": "premium-brake-3.80"
+    }
+  },
+  "context_frozen": {
+    "fast_balanced": "bit-identical to shipped runtime_models on Train and Dev",
+    "k1_scope": {
+      "count_cap": 48,
+      "denylist_families": [
+        "korean_reasoning",
+        "python_program",
+        "rule_reasoning"
+      ]
+    },
+    "note": "E25 opened a window whose fired lever was brake_ratio 3.25→3.80, not rollback. This protocol asks whether that single stdlib knob should enter the runtime. Isolated residual-majority views stay the E10 serving path. Full-batch family:other ratios are evidence only; mixed public batches already exceed 4.0 on that subset under the shipped champion.",
+    "parent_predicted_cap": 3.25
+  },
+  "decision_reasons": {
+    "fail": "3.80-only Premium brake failed a pre-registered confirmation gate. Keep brake_ratio 3.25. Do not export src/.",
+    "pass": "3.80-only Premium brake beat shipped on Train Premium quality and Dev official score, matched E25 conformal bit-for-bit, held isolated residual and aggregate operating caps, and the grouped-bootstrap 2.5% quantile stayed positive. Promote brake_ratio 3.25→3.80 only. Conformal rollback stays out of the runtime."
+  },
+  "decisions": {
+    "fail": "record-e27-no-promote-current-runtime",
+    "pass": "record-e27-promote-brake-ratio-3.80"
+  },
+  "experiment": "e27-premium-brake-380-v1",
+  "fresh_seeds": [
+    258662104,
+    1081333920,
+    1404762205,
+    999955836,
+    1043997100
+  ],
+  "metric": {
+    "bootstrap": "Paired group bootstrap of Dev official episode contributions 0.3*(score_3.80-score_shipped), groups from grouped_crossfit on Dev episodes, 10000 draws per sealed seed.",
+    "conformal_identity": "Train-fitted E25 bound applied to Train and Dev must copy the 3.80-only Premium vector and roll nothing.",
+    "full_batch_family": "Actual and inflated ratios of the 3.80 vector sliced by family inside the mixed batch. selection_use=none.",
+    "premium_quality": "Mean public score of the Premium chosen models on the full split."
+  },
+  "motivation": {
+    "e25_decision": "record-e25-promotion-window-open-premium-conformal",
+    "e25_decision_core": "c0ef51ff7f9f87545790b99b7c33c31bced31260b7813cc2eac486d3949e61ea",
+    "e26_decision": "record-e26-no-promote-current-runtime",
+    "e26_decision_core": "84c2075d35bff7cc5c1dc1297bf03e50ce76c4b4b2f2e6cce6983f290279d914",
+    "parent_queue": "E25 window confirmation: 3.80-only vs conformal no-op"
+  },
+  "n_bootstrap_draws": 10000,
+  "n_fresh_seeds": 5,
+  "output": {
+    "audit_relative": "build/run-e27-premium-brake-380/episode-audit.json",
+    "overwrite_refused": true,
+    "report_relative": "build/run-e27-premium-brake-380/report.json"
+  },
+  "pins": {
+    "dev_inputs_sha256": "5920f9ea9e3da147aa546659054feb08afb7e11a0e4db6967b293ff79b759abc",
+    "dev_outcomes_sha256": "acb7c5ed522c4e1b65e9ab14b3fe9458fcba32eb3d9de8d3f53e24b8904d2e66",
+    "n_dev": 880,
+    "n_public": 2640,
+    "n_train": 1760,
+    "policy_sha256": "7c892c423da5fa762e7e1a93b9fa071be51e259b65d2b63a5ba434c4342d7a8e",
+    "train_inputs_sha256": "029a0fb1f70432a05b837a1291d86d42278bb202d808a6a12911b0dae8628ac4",
+    "train_outcomes_sha256": "97a5a787086b3e1d9fa9c7945518543540e527ea248df4a4760de581b612a4ba"
+  },
+  "protocol_id": "e27-premium-brake-380-v1",
+  "schema_version": 1,
+  "seed_derivation": {
+    "algorithm": "digest_i = SHA256(UTF8(PREFIX) + NUL + bytes.fromhex(CORE) + i.to_bytes(4,'big')); seed_i = int.from_bytes(digest_i[:4],'big') & 0x7fffffff; collision fails closed.",
+    "core_sha256": "84c2075d35bff7cc5c1dc1297bf03e50ce76c4b4b2f2e6cce6983f290279d914",
+    "forbidden_previous_seeds": [
+      20260821,
+      20260822,
+      20260823,
+      20260824,
+      20260825,
+      1524653244,
+      655399222,
+      544868342,
+      1444644023,
+      2132086428,
+      292577053,
+      1003090710,
+      253011083,
+      534284889,
+      2049515330,
+      515672025,
+      572878001,
+      763133369,
+      68726617,
+      1988695219,
+      929558432,
+      1924177588,
+      1558982291,
+      995925147,
+      1201315901,
+      850766810,
+      462283710,
+      130672035,
+      733125616,
+      733043265,
+      1283801968,
+      498402659,
+      308984772,
+      213236528,
+      2121011317,
+      970535163,
+      825752938,
+      1814108375,
+      2126478916,
+      1743996725,
+      591857826,
+      1200388099,
+      347547587,
+      814704962,
+      1996052478,
+      194508650,
+      882441160,
+      1504795044,
+      5801447,
+      1801443602,
+      418412800,
+      1248167884,
+      695347480,
+      889745305,
+      1050741673,
+      1966042472,
+      119740721,
+      1080595098,
+      1829377328,
+      718291179,
+      1308133280,
+      1216182205
+    ],
+    "n": 5,
+    "prefix": "scrooge-e27-premium-brake-380-v1",
+    "skip_digest_on_collision": false
+  },
+  "thresholds": {
+    "actual_ratio_max": 3.8,
+    "bootstrap_draws": 10000,
+    "bootstrap_q2_5_min_exclusive": 0.0,
+    "buy_brake_ratio": 3.8,
+    "dev_delta_min_exclusive": 0.0,
+    "full_batch_family_selection_use": "none",
+    "predicted_ratio_max": 3.8,
+    "residual_premium_actual_max": 4.0,
+    "residual_premium_inflated_max": 4.0,
+    "train_premium_quality_delta_min_exclusive": 0.0
+  }
+}
