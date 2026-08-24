@@ -59,6 +59,7 @@ class ArtifactTest(unittest.TestCase):
         self.assertTrue(artifact.budget_brake["enabled"])
         self.assertEqual(artifact.budget_brake["brake_ratio"], 3.8)
         self.assertEqual(artifact.budget_brake["count_cap"], 48)
+        self.assertEqual(artifact.budget_brake["runaway_share"], 0.06)
         self.assertEqual(
             artifact.family_guard.value["artifact_type"],
             family_guard_router.ARTIFACT_TYPE,

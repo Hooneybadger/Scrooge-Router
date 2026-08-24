@@ -51,6 +51,7 @@ SHIPPED_FAST_CAP = 1.11
 SHIPPED_BALANCED_CAP = 1.45
 SHIPPED_PREMIUM_CAP = 3.25
 SHIPPED_BRAKE_RATIO = 3.8
+SHIPPED_RUNAWAY_SHARE = 0.06
 SMALL_VIEW_N = 200
 
 
@@ -331,6 +332,10 @@ class ServingReplica:
         brake_ratio = float(brake.budget_brake["brake_ratio"])
         if abs(brake_ratio - SHIPPED_BRAKE_RATIO) > 1e-12:
             raise ProtocolError("shipped brake_ratio drifted")
+        if "runaway_share" not in brake.budget_brake:
+            raise ProtocolError("shipped runaway_share is missing")
+        if abs(float(brake.budget_brake["runaway_share"]) - SHIPPED_RUNAWAY_SHARE) > 1e-12:
+            raise ProtocolError("shipped runaway_share drifted")
         return cls(
             policy=policy,
             brake=brake,
@@ -634,6 +639,7 @@ __all__ = (
     "RESIDUAL_FAMILY",
     "SHIPPED_BALANCED_CAP",
     "SHIPPED_BRAKE_RATIO",
+    "SHIPPED_RUNAWAY_SHARE",
     "SHIPPED_FAST_CAP",
     "SHIPPED_PREMIUM_CAP",
     "SMALL_VIEW_N",

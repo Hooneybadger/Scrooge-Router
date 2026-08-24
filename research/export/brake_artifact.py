@@ -43,6 +43,7 @@ DENYLIST_FAMILIES = (
     "rule_reasoning",
 )
 RUNAWAY_LIGHT_FRACTION = 0.02
+RUNAWAY_SHARE = 0.06
 TRAIN_FULL_PRED_LIGHT = 8.576375372816607
 RUNAWAY_ABSOLUTE = 0.17152750745633214
 CLIP = (-1.0, 1.0)
@@ -157,6 +158,7 @@ def export(*, parent_path: Path, output_path: Path) -> Mapping[str, Any]:
         "count_cap": COUNT_CAP,
         "denylist_families": list(DENYLIST_FAMILIES),
         "runaway_light_fraction": RUNAWAY_LIGHT_FRACTION,
+        "runaway_share": RUNAWAY_SHARE,
         "train_full_pred_light": TRAIN_FULL_PRED_LIGHT,
         "runaway_absolute": RUNAWAY_ABSOLUTE,
         "feature_signature": FEATURE_SIGNATURE,

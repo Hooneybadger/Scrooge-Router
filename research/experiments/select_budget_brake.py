@@ -7,7 +7,9 @@ A fixed promotion count does not bound spend: the same N expensive K1 rows
 can push an inflated Premium ratio over the official cap. The overlay keeps
 the family-guard Fast and Balanced paths, then promotes parent ax31 rows
 in predicted Q_K order while the batch predicted Premium ratio stays at
-or under 3.25. Constants are frozen. Dev is scored once and has a veto,
+or under 3.80. The per-item runaway guard is
+``min(runaway_absolute, runaway_share × batch predicted light)``.
+Constants track the bundled artifact. Dev is scored once and has a veto,
 not a vote.
 """
 
@@ -34,15 +36,16 @@ _AX31 = MODEL_IDS[1]
 _K1 = MODEL_IDS[2]
 
 LOCKED = {
-    "brake_ratio": 3.25,
+    "brake_ratio": 3.8,
     "count_cap": 48,
     "denylist_families": [
         "korean_reasoning",
         "python_program",
         "rule_reasoning",
     ],
-    "runaway_absolute": 0.17152750745633214,
+    "runaway_absolute": 0.17152750745633213,
     "runaway_light_fraction": 0.02,
+    "runaway_share": 0.06,
     "train_full_pred_light": 8.576375372816607,
     "count_rule_worst_adaptive_inflated": {
         "16": 3.5370,
@@ -167,6 +170,7 @@ def main() -> int:
         "count_cap",
         "runaway_absolute",
         "runaway_light_fraction",
+        "runaway_share",
         "train_full_pred_light",
     ):
         if float(block[key]) != float(LOCKED[key]):
