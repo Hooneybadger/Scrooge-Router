@@ -47,6 +47,10 @@ python3 -m research.experiments.select_budget_brake   # 고정 Premium 브레이
 비용 예측 오차가 계열마다 달라 Train에서 배운 보정이 Dev에서 무너졌고,
 그 관찰이 `try_family_costing`으로 이어졌습니다.
 
+`select_budget_brake` 뒤에는 남은 예산을 예측 브레이크만 열어 쓰는
+확인이 있습니다. `run_e27_premium_brake_380`가 예측 비율 3.80을
+게이트에 걸었고, 런타임에 반영하는 값은 브레이크 비율뿐입니다.
+
 각 스크립트는 `build/<스크립트 이름>/report.json`에 결과를 씁니다.
 `lock_final_policy`가 만든 아티팩트를 런타임에 반영하려면 직접
 `src/ossp_router/resources/`로 복사합니다. 실험 코드는 런타임 트리에 쓰지
