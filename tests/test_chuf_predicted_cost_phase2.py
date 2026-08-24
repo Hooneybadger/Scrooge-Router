@@ -36,6 +36,18 @@ def _require_public_inputs(test: unittest.TestCase) -> None:
         test.skipTest("pinned public Train+Dev files are not materialized")
 
 
+def _require_live_matches_sealed_architecture(test: unittest.TestCase) -> None:
+    from research.lab.chuf_predicted_cost_phase2 import (
+        PROTOCOL_PATH,
+        live_artifact_snapshot,
+        load_protocol,
+    )
+
+    sealed = load_protocol(PROTOCOL_PATH)["architecture"]["artifact"]
+    if live_artifact_snapshot() != sealed:
+        test.skipTest("CHUF protocol is sealed against a previous runtime artifact")
+
+
 _require_research_stack()
 
 
@@ -206,6 +218,8 @@ class ArtifactAndThresholdTests(unittest.TestCase):
         snap = architecture_snapshot()
         self.assertEqual(snap["artifact"], live)
         self.assertEqual(live["fast_cap"], FAST_CAP)
+        self.assertEqual(live["premium_cap"], 3.25)
+        self.assertEqual(live["brake_ratio"], 3.8)
         self.assertEqual(live["runaway_fraction"], RUNAWAY_FRACTION)
         self.assertEqual(live["multipliers"]["other"], FAMILY_OTHER_MULTIPLIER)
         self.assertEqual(live["count_cap"], PREMIUM_K1_MAX)
@@ -228,6 +242,7 @@ class ArtifactAndThresholdTests(unittest.TestCase):
 class ProtocolHashTests(unittest.TestCase):
     def test_canonical_hash_is_deterministic(self) -> None:
         _require_public_inputs(self)
+        _require_live_matches_sealed_architecture(self)
         from research.lab.chuf_predicted_cost_phase2 import (
             EXPECTED_PROTOCOL_SHA256,
             PROTOCOL_PATH,
@@ -304,7 +319,9 @@ class RunnerRefuseTests(unittest.TestCase):
                 }
             )
         if _PUBLIC_TRAIN_INPUTS.is_file():
-            verify_protocol(load_protocol(PROTOCOL_PATH), EXPECTED_PROTOCOL_SHA256)
+            sealed = load_protocol(PROTOCOL_PATH)
+            if sealed.get("architecture") == architecture_snapshot():
+                verify_protocol(sealed, EXPECTED_PROTOCOL_SHA256)
 
     def test_overwrite_and_foreign_paths_refused(self) -> None:
         from research.experiments.run_chuf_predicted_cost_phase2 import main

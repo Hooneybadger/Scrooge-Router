@@ -93,6 +93,7 @@ PREMIUM_K1_MAX = 48
 FAST_CAP = 1.11
 BALANCED_CAP = 1.45
 PREMIUM_CAP = 3.25
+BRAKE_RATIO = 3.8
 RUNAWAY_FRACTION = 0.16500000000000015
 MAX_UPGRADE_FRACTION = 0.75
 FAMILY_OTHER_MULTIPLIER = 2.5
@@ -197,8 +198,10 @@ def architecture_snapshot() -> dict[str, Any]:
     live = live_artifact_snapshot()
     if live["fast_cap"] != FAST_CAP or live["balanced_cap"] != BALANCED_CAP:
         raise RuntimeError("family-guard predicted Fast/Balanced caps drifted")
-    if live["premium_cap"] != PREMIUM_CAP or live["brake_ratio"] != PREMIUM_CAP:
-        raise RuntimeError("Premium predicted cap / brake_ratio drifted")
+    if live["premium_cap"] != PREMIUM_CAP:
+        raise RuntimeError("Premium predicted cap drifted")
+    if live["brake_ratio"] != BRAKE_RATIO:
+        raise RuntimeError("Premium brake_ratio drifted")
     if live["runaway_fraction"] != RUNAWAY_FRACTION:
         raise RuntimeError("family-guard runaway_fraction drifted")
     if live["max_upgrade_fraction"] != MAX_UPGRADE_FRACTION:
