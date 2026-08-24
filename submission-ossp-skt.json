@@ -2,7 +2,7 @@
   "schema_version": 1,
   "challenge_id": "ossp-2026-llm-router-challenge",
   "repository_url": "https://github.com/Hooneybadger/Scrooge-Router",
-  "commit_sha": "8b080a71c8981c33cb23c9e3ce8bdae7d5f3ea70",
-  "image_digest": "docker.io/mongsangga/scrooge-router@sha256:c7a1041fe548db87f15ca48f29b39a1638398da0455e2c3b562efe2e319469e7",
+  "commit_sha": "7d60cdffd252d64b7ffa7ec64ca10eae7fa9c5d7",
+  "image_digest": "docker.io/mongsangga/scrooge-router@sha256:3841ee53d175027a23c24790c71acb55c901e371e806b927c2e60fbb80192025",
   "primary_license": "Apache-2.0"
 }
