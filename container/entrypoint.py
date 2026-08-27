@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from ossp_router.budget_brake_router import main
+from ossp_router.distributional_router import main
 
 
 if __name__ == "__main__":
