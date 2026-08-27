@@ -59,6 +59,11 @@ python3 -m research.experiments.select_budget_brake   # 고정 Premium 브레이
 게이트가 후보를 가르지 못하면 통과가 아니라 실패로 칩니다. 새 실험을
 설계할 때 이 구분을 따르십시오.
 
+제출 라우터는 이후 `distributional_router`로 바뀌었습니다. 연구 적합은
+`research.lab.distributional_knapsack`이고, 동결 아티팩트는
+`research.export.distributional_artifact`가 만듭니다. 이전 4계층은 비교용으로
+남아 있습니다.
+
 각 스크립트는 `build/<스크립트 이름>/report.json`에 결과를 씁니다.
 `lock_final_policy`가 만든 아티팩트를 런타임에 반영하려면 직접
 `src/ossp_router/resources/`로 복사합니다. 실험 코드는 런타임 트리에 쓰지
@@ -94,7 +99,7 @@ python3 -m research.experiments.select_budget_brake   # 고정 Premium 브레이
 python3 -m research.audit.router_reproduction
 python3 -m research.audit.brake_reproduction
 python3 -m research.audit.submission_contract \
-  --router-module ossp_router.budget_brake_router \
+  --router-module ossp_router.distributional_router \
   --input data/materialized/dev/inputs.json \
   --report build/contract/report.json
 ```

@@ -74,6 +74,8 @@ jobs:
           python -m unittest \
             tests.test_challenger_heads \
             tests.test_champion_robustness_audit \
+            tests.test_distributional_knapsack \
+            tests.test_distributional_router \
             tests.test_chuf_frozen_runtime_fidelity \
             tests.test_chuf_predicted_cost_phase2 \
             tests.test_chuf_tvball_confirmation \

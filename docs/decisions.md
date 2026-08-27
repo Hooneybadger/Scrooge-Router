@@ -313,3 +313,44 @@ Train은 이 값을 판별하지 못합니다. Train 품질은 비율 3.40에서
 [`research/experiments/run_e28_batch_relative_runaway.py`](../research/experiments/run_e28_batch_relative_runaway.py)에
 있습니다.
 
+## 15. 품질과 비용은 분포로 보고, 배분은 배치 위험에 묶는다
+
+14항까지의 제출 라우터는 능선 회귀와 계열 가드, 예측 브레이크입니다.
+같은 비용을 쓰면서도 더 나은 조합을 고르지 못하는 한계는 8항과
+[이슈 #21](https://github.com/Hooneybadger/Scrooge-Router/issues/21)에
+남아 있었습니다. 특징을 늘리는 시도는 거의 나아가지 못했습니다.
+
+그래서 계층을 더 쌓지 않고 예측기와 배분기를 통째로 바꿨습니다.
+프롬프트에서 고정 어휘와 구조 특징을 뽑고, 모델별 품질과 비용의
+평균·상단을 트리로 예측합니다. 배분은 평균 비용만 보지 않고 상단
+갭을 등급별로 더합니다. 배치 구성이 학습 분포와 멀어지면 사용 비율을
+내리고, 내용 종류가 적으면 배운 경로를 쓰지 않습니다. 같은 내용은
+한 단위로 올려 입력 순서에 결과가 갈리지 않게 합니다.
+
+안전의 1차 기준은 공식 분할 점수만이 아닙니다. 비용을 1.054배로 부풀린
+구성 편이 뷰에서 한도까지 1% 여유가 남는지를 봤습니다. 공개 인증에서
+기본 뷰 11,680개와 넓은 뷰 20,610개의 한도 위반은 0건입니다. 최악 팽창
+비율은 Fast 1.228, Balanced 1.971, Premium 3.695로 각각 한도 아래입니다.
+
+공개 Dev 880문항의 공식 채점은 다음과 같습니다.
+
+| 등급 | 비용 비율 | 한도 | 등급 점수 |
+| --- | ---: | ---: | ---: |
+| Fast | 1.159 | 1.25 | 0.6787 |
+| Balanced | 1.707 | 2.0 | 0.7139 |
+| Premium | 3.436 | 4.0 | 0.7670 |
+
+최종 점수 `0.715767`. 세 등급 모두 한도의 95% 아래이고, Fast는 think
+모델을 쓰지 않습니다. 이전 제출 `0.670710`보다 공개 점수가 오르고,
+공식 hash-regex의 공개 Dev `0.6954`보다도 높습니다. hash-regex는
+Premium이 한도에 붙어 채점셋에서 0점이 된 사례가 있으므로, 그 점수만
+보고 고르지 않았습니다.
+
+이전 4계층은 저장소에 비교용으로 남깁니다. 제출 진입점과 패키지
+`router-run`은 `distributional_router`입니다.
+
+근거는
+[`research/lab/distributional_knapsack.py`](../research/lab/distributional_knapsack.py)와
+[`research/export/distributional_artifact.py`](../research/export/distributional_artifact.py)에
+있습니다.
+
