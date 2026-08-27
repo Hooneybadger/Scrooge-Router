@@ -30,7 +30,6 @@ from research.lab.distributional_knapsack import (
     PREMIUM_K1_MAX_TV,
     PREMIUM_K1_MIN_GROUPS,
     STRUCTURAL_FEATURE_NAMES,
-    DistributionalPredictions,
     FamilyCalibration,
     FitBundle,
     fit_family_calibration,
