@@ -35,6 +35,7 @@ from .protocol import (
     Decision,
     Episode,
     InputBatch,
+    Message,
     ProtocolError,
     RoutingPolicy,
     Submission,
@@ -59,6 +60,46 @@ VOCABULARY_SIZE = 1_024
 MAX_LEARNED_EPISODES = 6_000
 MAX_LEARNED_CHARACTERS = 30_000_000
 MAX_LEARNED_MESSAGES = 100_000
+SMALL_BATCH_UNIQUE_CUTOFF = 128
+SMALL_BATCH_POWER = 0.5
+# Train-frozen overlays for unique_count in [1, 127].  The 128+ path keeps
+# the bundled family calibration.  Scales follow FAMILY_NAMES order.
+SMALL_BATCH_MEAN_SCALES: Tuple[Tuple[float, float, float], ...] = (
+    (1.1541784551218242, 1.0155484748810382, 1.0514963565899413),
+    (0.6176328432073351, 0.6478308653872528, 0.6979639882744141),
+    (1.1398784850239714, 1.175992471047395, 1.140533832003011),
+    (1.1561453592957813, 1.1590159967514397, 1.0533802158560723),
+    (0.9817093192819162, 0.9875217168938292, 0.9551826851127155),
+    (1.053538753725097, 0.9383613988014844, 1.04304079582686),
+    (0.8273882259570366, 0.8132039363392366, 0.9983144742409114),
+    (0.90475978558204, 1.0181121953764847, 1.0156747409604754),
+    (1.159687571618085, 1.0630728591275511, 1.1131132694149781),
+    (1.0768912314475494, 1.0805156860500167, 0.8610257963048321),
+)
+SMALL_BATCH_UPPER_SCALES: Tuple[Tuple[float, float, float], ...] = (
+    (1.0848901121902774, 1.0772589155157182, 1.3015089918755758),
+    (1.0, 1.0, 1.205470604150946),
+    (1.037496753357003, 1.0992972085883426, 1.41386058258802),
+    (1.0864421426903625, 2.160897613255152, 1.3972397458230152),
+    (1.0120585571479697, 1.0154020023485952, 1.0463726346372089),
+    (1.1729280136789426, 1.1722165150573007, 1.1615029895624174),
+    (1.0, 1.0, 1.3828049140105283),
+    (1.0339518599042492, 1.0600641970571159, 1.1226486973638172),
+    (1.2402688309313077, 1.2809568789014045, 1.369168185707051),
+    (1.0732993136471245, 1.0166022103969317, 1.1348896446603225),
+)
+SMALL_BATCH_LIGHT_LOWER_SCALES: Tuple[float, ...] = (
+    0.6172541207661515,
+    0.3362594383801259,
+    0.14314753340463007,
+    0.5028072190713874,
+    0.5543980698148139,
+    0.06212499507727453,
+    0.2764677035534054,
+    0.17138695017084749,
+    0.11228531524866972,
+    0.5682342545610666,
+)
 
 NUMBER_TOKEN = "<number>"
 HEX_TOKEN = "<hex>"
@@ -857,6 +898,120 @@ def _content_key(episode: Episode) -> str:
     return hashlib.sha256(episode_text(episode).encode("utf-8")).hexdigest()
 
 
+def stable_surface_text(text: str) -> str:
+    """Normalize encoding and whitespace while preserving choice notation."""
+
+    normalized = unicodedata.normalize("NFC", text)
+    normalized = normalized.replace("\r\n", "\n").replace("\r", "\n")
+    return "\n".join(line.rstrip(" \t") for line in normalized.split("\n"))
+
+
+def stabilize_episode(episode: Episode) -> Episode:
+    """Rewrite prompt text without changing the episode ID or roles."""
+
+    if episode.prompt is not None:
+        return Episode(
+            episode_id=episode.episode_id,
+            prompt=stable_surface_text(episode.prompt),
+        )
+    assert episode.messages is not None
+    return Episode(
+        episode_id=episode.episode_id,
+        messages=tuple(
+            Message(message.role, stable_surface_text(message.content))
+            for message in episode.messages
+        ),
+    )
+
+
+def small_batch_route_enabled(unique_count: int) -> bool:
+    """Return whether the two-sided small-batch route owns this batch."""
+
+    return 0 < int(unique_count) < SMALL_BATCH_UNIQUE_CUTOFF
+
+
+def _apply_family_scales(
+    raw_mean: Sequence[Sequence[float]],
+    raw_upper: Sequence[Sequence[float]],
+    family_ids: Sequence[int],
+    mean_scales: Sequence[Sequence[float]],
+    upper_scales: Sequence[Sequence[float]],
+) -> Tuple[list[Tuple[float, ...]], list[Tuple[float, ...]]]:
+    mean: list[Tuple[float, ...]] = []
+    q90: list[Tuple[float, ...]] = []
+    for expected, upper, family_id in zip(raw_mean, raw_upper, family_ids):
+        mean.append(
+            tuple(
+                expected[index] * mean_scales[family_id][index] for index in range(3)
+            )
+        )
+        q90.append(
+            tuple(
+                upper[index] * upper_scales[family_id][index] for index in range(3)
+            )
+        )
+    return mean, q90
+
+
+def _tier_charges(
+    mean: Sequence[Sequence[float]],
+    q90: Sequence[Sequence[float]],
+    config: TierConfig,
+) -> list[Tuple[float, float, float]]:
+    charges: list[Tuple[float, float, float]] = []
+    for expected, upper in zip(mean, q90):
+        gap_ax = max(0.0, upper[1] - expected[1])
+        gap_k1 = max(0.0, upper[2] - expected[2])
+        charges.append(
+            (
+                expected[0],
+                max(expected[0], expected[1] + config.ax31_tail_weight * gap_ax),
+                max(expected[0], expected[2] + config.k1_tail_weight * gap_k1),
+            )
+        )
+    return charges
+
+
+def _small_batch_target_fraction(
+    config: TierConfig,
+    budget_multiplier: float,
+    unique_count: int,
+    family_tv: float,
+) -> float:
+    lower = 1.0 / float(budget_multiplier)
+    fallback = min(
+        config.base_fraction,
+        max(
+            lower,
+            config.base_fraction * (1.0 - config.composition_penalty * family_tv),
+        ),
+    )
+    share = min(
+        1.0,
+        max(0.0, unique_count / float(SMALL_BATCH_UNIQUE_CUTOFF)),
+    ) ** float(SMALL_BATCH_POWER)
+    return float(lower + (fallback - lower) * share)
+
+
+def _small_batch_surfaces(
+    mean: Sequence[Sequence[float]],
+    q90: Sequence[Sequence[float]],
+    family_ids: Sequence[int],
+    config: TierConfig,
+) -> Tuple[list[Tuple[float, float, float]], list[float]]:
+    charges = _tier_charges(mean, q90, config)
+    guarded: list[Tuple[float, float, float]] = []
+    light: list[float] = []
+    for charge, family_id, expected in zip(charges, family_ids, mean):
+        lower = max(
+            expected[0] * SMALL_BATCH_LIGHT_LOWER_SCALES[family_id],
+            sys.float_info.min,
+        )
+        light.append(lower)
+        guarded.append((lower, max(charge[1], lower), max(charge[2], lower)))
+    return guarded, light
+
+
 def _content_tuple(episode: Episode) -> Tuple[object, ...]:
     if episode.prompt is not None:
         return ("prompt", episode.prompt)
@@ -907,6 +1062,7 @@ def _route_canonical(
             Tuple[float, ...],
             Tuple[float, ...],
             str,
+            int,
             str,
         ],
     ] = {}
@@ -941,25 +1097,24 @@ def _route_canonical(
             )
             family = prompt_family(episode)
             family_id = family_lookup[family]
-            mean = tuple(
-                raw_mean[index]
-                * artifact.family_calibration.mean_scales[family_id][index]
-                for index in range(3)
+            predicted = (
+                structural,
+                quality,
+                raw_mean,
+                raw_upper,
+                family,
+                family_id,
+                _content_key(episode),
             )
-            q90 = tuple(
-                raw_upper[index]
-                * artifact.family_calibration.q90_scales[family_id][index]
-                for index in range(3)
-            )
-            predicted = (structural, quality, mean, q90, family, _content_key(episode))
             cache[content] = predicted
         rows.append(predicted)
     structural = [row[0] for row in rows]
     quality = [row[1] for row in rows]
-    mean = [row[2] for row in rows]
-    q90 = [row[3] for row in rows]
+    raw_mean = [row[2] for row in rows]
+    raw_upper = [row[3] for row in rows]
     families = [row[4] for row in rows]
-    tie_keys = [row[5] for row in rows]
+    family_ids = [row[5] for row in rows]
+    tie_keys = [row[6] for row in rows]
     unique_count = len(set(tie_keys))
     family_counts = Counter(families)
     proportions = [family_counts[name] / len(rows) for name in FAMILY_NAMES]
@@ -978,9 +1133,36 @@ def _route_canonical(
             config.base_fraction * (1.0 - config.composition_penalty * tv),
         ),
     )
-    if unique_count < artifact.gates.min_content_groups:
+    if small_batch_route_enabled(unique_count):
+        mean, q90 = _apply_family_scales(
+            raw_mean,
+            raw_upper,
+            family_ids,
+            SMALL_BATCH_MEAN_SCALES,
+            SMALL_BATCH_UPPER_SCALES,
+        )
+        charges, light = _small_batch_surfaces(mean, q90, family_ids, config)
+        selected = _allocate(
+            quality,
+            charges,
+            light,
+            tie_keys,
+            budget_multiplier,
+            _small_batch_target_fraction(
+                config, budget_multiplier, unique_count, tv
+            ),
+            False,
+        )
+    elif unique_count < artifact.gates.min_content_groups:
         selected = tuple(0 for _ in rows)
     else:
+        mean, q90 = _apply_family_scales(
+            raw_mean,
+            raw_upper,
+            family_ids,
+            artifact.family_calibration.mean_scales,
+            artifact.family_calibration.q90_scales,
+        )
         if tier == "premium":
             allow_k1 = (
                 unique_count >= artifact.gates.premium_k1_min_groups
@@ -1006,17 +1188,7 @@ def _route_canonical(
                 tier == "balanced"
                 and unique_count >= artifact.gates.balanced_k1_min_groups
             )
-        charges = []
-        for expected, upper in zip(mean, q90):
-            gap_ax = max(0.0, upper[1] - expected[1])
-            gap_k1 = max(0.0, upper[2] - expected[2])
-            charges.append(
-                (
-                    expected[0],
-                    max(expected[0], expected[1] + config.ax31_tail_weight * gap_ax),
-                    max(expected[0], expected[2] + config.k1_tail_weight * gap_k1),
-                )
-            )
+        charges = _tier_charges(mean, q90, config)
         selected = _allocate(
             quality,
             charges,
@@ -1055,7 +1227,13 @@ def make_submission(
         raise ProtocolError("distributional artifact and policy do not match")
     if not learned_path_allowed(inputs):
         return make_heuristic_submission(inputs, policy, tier, strategy="always-light")
-    canonical = _canonical_batch(inputs)
+    stabilized = InputBatch(
+        inputs.schema_version,
+        inputs.challenge_id,
+        inputs.split,
+        tuple(stabilize_episode(episode) for episode in inputs.episodes),
+    )
+    canonical = _canonical_batch(stabilized)
     routed = _route_canonical(canonical, policy, artifact, tier)
     by_id = {decision.episode_id: decision.model_id for decision in routed.decisions}
     restored = Submission(

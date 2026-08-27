@@ -64,6 +64,12 @@ python3 -m research.experiments.select_budget_brake   # 고정 Premium 브레이
 `research.export.distributional_artifact`가 만듭니다. 이전 4계층은 비교용으로
 남아 있습니다.
 
+`run_generalization_followups`는 그 다음 질문 넷을 Train 접힘으로만
+고르고 Dev는 한 번만 엽니다. 작은 묶음 승격 제한과 추론 표기 정리는
+통과했고, 직접 이득 예측은 기각했으며, 일반 배치 q95 비용 보정은 덮기와
+스트레스는 통과했지만 공개 점수 손실이 `0.011761`이라 서빙에 넣지
+않았습니다.
+
 각 스크립트는 `build/<스크립트 이름>/report.json`에 결과를 씁니다.
 `lock_final_policy`가 만든 아티팩트를 런타임에 반영하려면 직접
 `src/ossp_router/resources/`로 복사합니다. 실험 코드는 런타임 트리에 쓰지
