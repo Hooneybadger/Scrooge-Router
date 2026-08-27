@@ -42,6 +42,7 @@ path = [
   "research/protocols/*.json",
   "src/ossp_router/resources/budget-brake-router.v1.json",
   "src/ossp_router/resources/cost-calibrated-router.v1.json",
+  "src/ossp_router/resources/distributional-router.v1.json",
   "src/ossp_router/resources/family-guard-router.v1.json",
   "src/ossp_router/resources/feasibility-ladder.v1.json",
 ]

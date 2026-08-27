@@ -11,8 +11,8 @@ SPDX-License-Identifier: Apache-2.0
 정답률을 최대한 끌어올립니다.
 
 이름은 구두쇠 스크루지에서 따왔습니다. 이 라우터의 특징이 비용을 아끼는
-방식에 있기 때문입니다. 예측이 잘 맞는 프롬프트에는 예산을 쓰고, 예측이
-자주 빗나가는 종류에는 실제보다 비싸게 값을 매겨 손을 대지 않습니다.
+방식에 있기 때문입니다. 문항마다 품질과 비용의 분포를 보고, 배치 구성이
+흔들리면 사용 비율을 줄입니다. 같은 내용은 항상 같은 모델로 올립니다.
 
 [2026 오픈소스 개발자대회](https://osscontest.kr/) SK텔레콤 지정과제
 [Efficient LLM Routing Challenge](https://github.com/sktelecom/ossp-2026-llm-router-challenge)에서
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
 그래서 상한 하나로 막으려면 예측이 가장 많이 빗나가는 종류를 기준으로
 모든 곳에 여유를 잡아야 하고, 결국 예산 대부분을 쓰지 못한 채 남깁니다.
 
-이 라우터는 여유를 위험이 있는 자리에만 잡습니다.
+이 라우터는 여유를 문항의 비용 상단과 배치의 구성 편이에 둡니다.
 
 ## 결과
 
@@ -40,14 +40,14 @@ SPDX-License-Identifier: Apache-2.0
 
 | 등급 | 비용 비율 | 한도 | 가중치 | 등급 점수 |
 | --- | ---: | ---: | ---: | ---: |
-| Fast | 1.093 | 1.25 | 0.4 | 0.6432 |
-| Balanced | 1.396 | 2.0 | 0.3 | 0.6744 |
-| Premium | 2.316 | 4.0 | 0.3 | 0.7037 |
+| Fast | 1.159 | 1.25 | 0.4 | 0.6787 |
+| Balanced | 1.707 | 2.0 | 0.3 | 0.7139 |
+| Premium | 3.436 | 4.0 | 0.3 | 0.7670 |
 
-최종 점수 `0.670710`. 세 등급 모두 한도의 95% 아래에서 동작합니다.
+최종 점수 `0.715767`. 세 등급 모두 한도의 95% 아래에서 동작합니다.
 
 실행에는 네트워크도 GPU도 필요하지 않습니다. 표준 라이브러리만 쓰고,
-880문항 한 등급을 처리하는 데 2코어에서 16초, 메모리는 67MB입니다.
+880문항 한 등급을 처리하는 데 2코어에서 2초, 메모리는 42MB입니다.
 한도는 등급당 90초와 2GiB입니다.
 
 ## 5분 만에 돌려보기
@@ -63,7 +63,7 @@ toy 자료로 세 등급의 선택 결과를 만들고 채점합니다.
 
 ```console
 for tier in fast balanced premium; do
-  PYTHONPATH=src python3 -m ossp_router.budget_brake_router \
+  PYTHONPATH=src python3 -m ossp_router.distributional_router \
     --input data/toy/inputs.json \
     --tier "$tier" \
     --output "build/toy/$tier.json"
@@ -98,16 +98,17 @@ docker build --pull --platform linux/arm64 \
 
 ## 어떻게 동작하나
 
-네 계층으로 나뉩니다. 위 계층은 아래 계층을 바꾸지 않고 예산을 쓰는 방식만
-바꿉니다.
+제출 라우터는 `distributional_router` 하나입니다. 학습은 실행 시점에 하지 않고,
+동결된 트리와 상한만 읽습니다.
 
-| 계층 | 모듈 | 하는 일 |
-| --- | --- | --- |
-| 4 | `budget_brake_router` | 치우친 배치의 지출을 조이고 Premium 승격을 예측 비율 3.80으로 제한 |
-| 3 | `family_guard_router` | 예측이 빗나가는 프롬프트 묶음의 회계 비용을 올림 |
-| 2 | `feasibility_ladder` | Fast 예산을 실행가능성 검사를 거쳐 커밋 |
-| 1 | `cost_calibrated_router` | 프롬프트에서 비용과 정확도 향상을 예측 |
+| 단계 | 하는 일 |
+| --- | --- |
+| 특징 | 길이·문장·기호 같은 구조 특징과 고정 어휘로 문항을 숫자로 바꿈 |
+| 예측 | 모델별 품질, 비용 평균, 비용 상단을 트리 앙상블로 예측 |
+| 위험 | 배치 구성이 흔들리면 사용 비율을 내리고, Fast는 think 모델을 쓰지 않음 |
+| 배분 | 같은 내용은 묶어서 올리고, 이득 대비 비용이 큰 순으로 한도에 닿을 때까지 올림 |
 
+이전 계열 가드·예산 브레이크 계층은 저장소에 비교용으로 남겨 둡니다.
 자세한 구조는 [아키텍처](docs/architecture.md)에, 왜 이렇게 정했는지는
 [설계 결정 기록](docs/decisions.md)에 있습니다.
 
@@ -125,7 +126,7 @@ docker build --pull --platform linux/arm64 \
 
 프로젝트를 이해하려면 다음 순서로 읽으면 됩니다.
 
-- [아키텍처](docs/architecture.md): 네 계층과 데이터 흐름
+- [아키텍처](docs/architecture.md): 제출 라우터와 데이터 흐름
 - [설계 결정 기록](docs/decisions.md): 왜 그 값을 골랐는지, 무엇이 실패했는지
 - [로드맵과 확장 지점](docs/roadmap.md): 다른 상황에 적용하는 방법
 - [실험 파이프라인](research/README.md): 아티팩트를 다시 만드는 절차
