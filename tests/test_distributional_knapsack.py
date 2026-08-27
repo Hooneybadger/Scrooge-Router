@@ -7,6 +7,9 @@ import pathlib
 import sys
 import unittest
 
+from ossp_router import distributional_router
+from ossp_router.protocol import Episode
+
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -17,9 +20,6 @@ try:
     from research.lab import distributional_knapsack as knapsack
 except ImportError:
     raise unittest.SkipTest("numpy / research stack is not installed")
-
-from ossp_router import distributional_router
-from ossp_router.protocol import Episode
 
 
 class DistributionalFeatureContractTest(unittest.TestCase):
