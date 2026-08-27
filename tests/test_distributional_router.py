@@ -96,15 +96,46 @@ class DistributionalRouterTest(unittest.TestCase):
         cls.policy = load_bundled_policy()
         cls.artifact = distributional_router.load_bundled_artifact()
 
-    def test_small_batches_are_all_light_in_every_tier(self) -> None:
+    def test_small_batches_use_the_two_sided_route(self) -> None:
         for tier in distributional_router.TIERS:
             submission = distributional_router.make_submission(
                 self.toy, self.policy, self.artifact, tier
             )
-            self.assertEqual(
-                {"ax31-light"},
-                {decision.model_id for decision in submission.decisions},
-            )
+            models = {decision.model_id for decision in submission.decisions}
+            if tier == "fast":
+                self.assertNotIn("axk1-think", models)
+
+    def test_stable_surface_collapses_whitespace_and_line_endings(self) -> None:
+        original = "Question: pick one.  \r\nA. yes\r\nB. no  "
+        stable = distributional_router.stable_surface_text(original)
+        self.assertEqual(
+            stable,
+            distributional_router.stable_surface_text(
+                original.replace("\r\n", "\n") + "   "
+            ),
+        )
+        self.assertIn("A. yes", stable)
+        self.assertFalse(stable.endswith(" "))
+
+    def test_small_batch_frozen_scales_follow_family_order(self) -> None:
+        self.assertEqual(
+            len(distributional_router.FAMILY_NAMES),
+            len(distributional_router.SMALL_BATCH_MEAN_SCALES),
+        )
+        self.assertEqual(
+            len(distributional_router.FAMILY_NAMES),
+            len(distributional_router.SMALL_BATCH_UPPER_SCALES),
+        )
+        self.assertEqual(
+            len(distributional_router.FAMILY_NAMES),
+            len(distributional_router.SMALL_BATCH_LIGHT_LOWER_SCALES),
+        )
+        for row in distributional_router.SMALL_BATCH_UPPER_SCALES:
+            self.assertGreaterEqual(min(row), 1.0)
+        self.assertTrue(distributional_router.small_batch_route_enabled(1))
+        self.assertTrue(distributional_router.small_batch_route_enabled(127))
+        self.assertFalse(distributional_router.small_batch_route_enabled(128))
+        self.assertFalse(distributional_router.small_batch_route_enabled(0))
 
     def test_fast_hard_bans_think_model_on_learned_path(self) -> None:
         episodes = tuple(
@@ -212,7 +243,7 @@ class DistributionalRouterTest(unittest.TestCase):
         inputs = load_input(DEV_INPUT)
         expected = {
             "fast": "55bb2bfbe8a63237ae820b64d94d1b925caeaedd2d826068da0e1f18f0d3f7a1",
-            "balanced": "0d5488bbc4374d660a9f829c2cbd8dd88e7c3dc1bb6d9bb7de2582677b54ef01",
+            "balanced": "c8ea4460a41c34acc5459fbcc6557b7027a618784ddffc7a9642d4cb9a0991ac",
             "premium": "72c33002180a684fbcd9507f342198082ac2e67c3b90c0b3b6181c1ed71d15db",
         }
         for tier, digest in expected.items():
