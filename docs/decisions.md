@@ -337,7 +337,7 @@ Train은 이 값을 판별하지 못합니다. Train 품질은 비율 3.40에서
 | 등급 | 비용 비율 | 한도 | 등급 점수 |
 | --- | ---: | ---: | ---: |
 | Fast | 1.159 | 1.25 | 0.6787 |
-| Balanced | 1.707 | 2.0 | 0.7139 |
+| Balanced | 1.692 | 2.0 | 0.7139 |
 | Premium | 3.436 | 4.0 | 0.7670 |
 
 최종 점수 `0.715767`. 세 등급 모두 한도의 95% 아래이고, Fast는 think
@@ -352,5 +352,33 @@ Premium이 한도에 붙어 채점셋에서 0점이 된 사례가 있으므로, 
 근거는
 [`research/lab/distributional_knapsack.py`](../research/lab/distributional_knapsack.py)와
 [`research/export/distributional_artifact.py`](../research/export/distributional_artifact.py)에
+있습니다.
+
+## 16. 작은 묶음은 위·아래 비용으로만 올리고, 표기 흔들림은 추론에서 접는다
+
+15항의 제출 라우터는 내용이 128종류보다 적으면 전부 경량 모델로
+보냈습니다. 공개 Dev 점수는 그 경로를 거의 쓰지 않지만, 짧은 요청
+묶음에서는 품질을 포기하고 있었습니다.
+
+Train에서 승격 비율을 묶음 크기에 따라 줄이고, Light 비용의 아래쪽
+꼬리와 계열별 상단 보정을 함께 쓰기로 했습니다. 공격적으로
+승격을 연 비교안은 같은 안전 검사를 실제로 실패했습니다. 이 경로는
+내용이 1~127종류일 때만 켜지고, 128종류 이상은 15항 경로입니다.
+
+따로, 줄바꿈·줄 끝 공백·Unicode만 다른 프롬프트는 특징을 뽑기 전에
+맞춥니다. 선택지 표기는 뜻과 가까울 수 있어 건드리지 않습니다. 번들
+런타임에서 형식 변형 뒤집힘은 줄었고 원본 공개 점수는 잃지 않았습니다.
+
+`family_partial_q95`는 칸 덮기 기준은 통과했지만, 같은 보정을 128종류
+이상 경로에 넣으면 공개 가중 점수가 `0.715767`에서 `0.704006`으로
+`0.011761` 떨어집니다. 허용 손실은 `0.0005`입니다. 재구성한 기본 뷰
+11,680개와 넓은 뷰 20,610개에서는 한도 위반이 없고 최악 팽창 비율도
+지금보다 커지지 않지만, 점수 손실 때문에 일반 배치에는 넣지 않습니다.
+q95 배수는 1~127종류 경로의 보조 보정으로만 남습니다.
+
+근거는
+[`research/experiments/run_generalization_followups.py`](../research/experiments/run_generalization_followups.py),
+[`research/lab/generalization_followups.py`](../research/lab/generalization_followups.py),
+[`research/lab/issue39_integration.py`](../research/lab/issue39_integration.py)에
 있습니다.
 
